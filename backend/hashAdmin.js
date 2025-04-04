@@ -1,0 +1,9 @@
+const bcrypt = require('bcrypt');
+
+const password = "admin123";
+
+bcrypt.hash(password, 10).then(hash => {
+    console.log("Hash generado:", hash);
+}).catch(err => {
+    console.error("Error al generar hash:", err);
+});
