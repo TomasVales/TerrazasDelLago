@@ -18,6 +18,11 @@ const Product = sequelize.define('Product', {
         type: DataTypes.FLOAT,
         allowNull: false,
     },
+    id: {
+        type: DataTypes.INTEGER,
+        primaryKey: true,
+        autoIncrement: true,
+    }
 });
 
 module.exports = Product;

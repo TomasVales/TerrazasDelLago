@@ -3,10 +3,19 @@ const Product = require('../models/products');
 const getAllProducts = async (req, res) => {
     try {
         const products = await Product.findAll();
-        res.json(products);
-    } catch (err) {
-        console.error(err);
-        res.status(500).json({ message: 'Error al obtener productos' });
+
+        // Si no hay productos, devuelve array vacío (no error)
+        res.status(200).json({
+            success: true,
+            data: products || [] // Asegura que siempre sea array
+        });
+
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({
+            success: false,
+            error: "Error al cargar productos"
+        });
     }
 };
 
@@ -22,15 +31,20 @@ const createProduct = async (req, res) => {
 };
 
 const getProductById = async (req, res) => {
+    const { id } = req.params;
+
+    // Strict validation - only allow positive integers
+    if (!/^\d+$/.test(id)) {
+        return res.status(400).json({ message: "El ID debe ser un número entero positivo" });
+    }
+
     try {
-        const product = await Product.findByPk(req.params.id);
-        if (!product) {
-            return res.status(404).json({ message: 'Producto no encontrado' });
-        }
+        const product = await Product.findByPk(Number(id));
+        if (!product) return res.status(404).json({ message: 'Producto no encontrado' });
         res.json(product);
     } catch (error) {
-        console.error('Error al obtener producto por ID:', error);
-        res.status(500).json({ message: 'Error al obtener producto' });
+        console.error('Error:', error);
+        res.status(500).json({ message: 'Error interno' });
     }
 };
 
