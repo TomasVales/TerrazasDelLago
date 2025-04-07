@@ -63,11 +63,12 @@ const getProductById = async (req, res) => {
 
 const updateProduct = async (req, res) => {
     try {
-        const { name, type, price } = req.body;
+        const { name, type, price, existingImage } = req.body;
+
         const product = await Product.findByPk(req.params.id);
         if (!product) return res.status(404).json({ message: 'Producto no encontrado' });
 
-        let imagePath = product.image;
+        let imagePath = existingImage || product.image;
 
         // Si se subió una nueva imagen
         if (req.file) {

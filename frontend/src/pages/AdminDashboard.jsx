@@ -16,8 +16,10 @@ function AdminDashboard() {
     const [loading, setLoading] = useState(false);
     const [activeTab, setActiveTab] = useState('products');
     const fileInputRef = useRef(null);
+    const BACKEND_URL = 'http://localhost:3000';
 
-    const token = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MSwicm9sZSI6ImFkbWluIiwiaWF0IjoxNzQzOTA5OTE2LCJleHAiOjE3NDM5OTYzMTZ9.jW1CV-JdL-znSCQS94f8M2woS4UTn0H-2w3vtwXmOrA';
+
+    const token = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MSwicm9sZSI6ImFkbWluIiwiaWF0IjoxNzQ0MDQ5MzA1LCJleHAiOjE3NDQxMzU3MDV9.A76yfsDRqzYLxtzAzMDkbOjDV4Q1GUIarvnYgMi7is4';
 
     // 📦 Traer pedidos
     const fetchOrders = async () => {
@@ -124,7 +126,11 @@ function AdminDashboard() {
         formData.append('description', newProduct.description);
 
         if (newProduct.imageFile) {
+            // Se eligió una nueva imagen
             formData.append('image', newProduct.imageFile);
+        } else if (editingProduct?.image) {
+            // No se eligió imagen nueva, mantener la anterior
+            formData.append('existingImage', editingProduct.image);
         }
 
         try {
@@ -157,7 +163,6 @@ function AdminDashboard() {
             setLoading(false);
         }
     };
-
     // 🗑 Eliminar producto
     const handleDelete = async (id) => {
         if (!confirm('¿Estás seguro de eliminar este producto?')) return;
@@ -192,12 +197,13 @@ function AdminDashboard() {
     };
 
     // Cargar datos del producto a editar
+
     const loadProductToEdit = (product) => {
         setEditingProduct(product);
         setNewProduct({
             ...product,
             imageFile: null,
-            imagePreview: product.image || null
+            imagePreview: product.image ? `${BACKEND_URL}${product.image}` : null
         });
     };
 
@@ -521,7 +527,7 @@ function AdminDashboard() {
                                         color: '#aaa'
                                     }}>Imagen actual:</label>
                                     <img
-                                        src={editingProduct.image}
+                                        src={`${BACKEND_URL}${editingProduct.image}`}
                                         alt="Imagen actual"
                                         style={{
                                             maxWidth: '200px',
@@ -608,7 +614,7 @@ function AdminDashboard() {
                                 >
                                     {product.image && (
                                         <img
-                                            src={product.image}
+                                            src={`${BACKEND_URL}${product.image}`}
                                             alt={product.name}
                                             style={{
                                                 width: '100%',
