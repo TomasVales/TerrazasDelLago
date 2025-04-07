@@ -1,35 +1,36 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
-import './App.css'
+import { useAuth } from './context/AuthContext';
+import Login from './pages/Login';
+import Register from './pages/Register';
+import MainUserPage from './pages/MainUserPage';
+import AdminDashboard from './pages/AdminDashboard';
+import { useState } from 'react';
 
 function App() {
-  const [count, setCount] = useState(0)
+  const { user, loading, logout } = useAuth();
+  const [showRegister, setShowRegister] = useState(false); // ✅ nuevo estado
 
-  return (
-    <>
+  if (loading) return <p style={{ padding: '2rem' }}>Cargando...</p>;
+
+  // ✅ Si está logueado
+  if (user) {
+    return (
       <div>
-        <a href="https://vite.dev" target="_blank">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
+        <button onClick={logout} style={{ position: 'absolute', top: 10, right: 10 }}>Cerrar sesión</button>
+        {user.role === 'admin' ? (
+          <AdminDashboard />
+        ) : (
+          <MainUserPage />
+        )}
       </div>
-      <h1>Vite + React</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.jsx</code> and save to test HMR
-        </p>
-      </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
-    </>
-  )
+    );
+  }
+
+  // ✅ Si no está logueado
+  return showRegister ? (
+    <Register goBack={() => setShowRegister(false)} />
+  ) : (
+    <Login onRegisterClick={() => setShowRegister(true)} />
+  );
 }
 
-export default App
+export default App;

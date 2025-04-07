@@ -45,7 +45,15 @@ const createOrder = async (req, res) => {
         order.total = total;
         await order.save();
 
-        res.status(201).json({ message: 'Pedido creado con éxito.', orderId: order.id, total });
+        // 👉 Buscar y devolver el pedido completo con relaciones
+        const fullOrder = await Order.findByPk(order.id, {
+            include: [
+                { model: User, attributes: ['name', 'email'] },
+                { model: OrderItem, include: [Product] }
+            ]
+        });
+
+        res.status(201).json(fullOrder);
     } catch (error) {
         console.error('Error al crear pedido:', error);
         res.status(500).json({ message: 'Error interno al crear el pedido.' });
@@ -57,8 +65,11 @@ const getUserOrders = async (req, res) => {
     try {
         const userId = req.user.id;
         const orders = await Order.findAll({
-            where: { UserId: userId }, // ✅ corrección clave
-            include: [{ model: OrderItem, include: [Product] }],
+            where: { userId },
+            include: [
+                { model: OrderItem, include: [Product] },
+                { model: User, attributes: ['name', 'email'] }
+            ],
             order: [['createdAt', 'DESC']],
         });
         res.json(orders);
@@ -106,20 +117,17 @@ const updateOrderStatus = async (req, res) => {
     }
 };
 
+// Eliminar un pedido
 const deleteOrder = async (req, res) => {
     try {
         const { id } = req.params;
 
-        // Verificamos que el pedido exista
         const order = await Order.findByPk(id);
         if (!order) {
             return res.status(404).json({ message: 'Pedido no encontrado.' });
         }
 
-        // Eliminamos los ítems del pedido primero
         await OrderItem.destroy({ where: { orderId: id } });
-
-        // Luego el pedido
         await order.destroy();
 
         res.json({ message: 'Pedido eliminado correctamente.' });

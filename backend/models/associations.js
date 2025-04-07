@@ -4,7 +4,12 @@ const Product = require('./products');
 const User = require('./user');
 
 // Relaciones
-Order.belongsTo(User); // Order.userId
+
+// 👇 ESTA LÍNEA FALTABA
+User.hasMany(Order, { foreignKey: 'userId' });
+
+Order.belongsTo(User, { foreignKey: 'userId' });
+
 Order.hasMany(OrderItem, { foreignKey: 'orderId' });
 
 OrderItem.belongsTo(Order, { foreignKey: 'orderId' });
