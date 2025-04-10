@@ -78,8 +78,8 @@ bcrypt.hash("admin123", 10).then(console.log);
 2. Insertar el usuario en la base de datos:
 
 ```sql
-INSERT INTO "Users" (username, password, role, createdAt, updatedAt)
-VALUES ('admin', '<hash generado>', 'admin', NOW(), NOW());
+INSERT INTO "Users" (name, email, password, role, createdAt, updatedAt)
+VALUES ('Admin', 'admin@admin.com', '<hash generado>', 'admin', NOW(), NOW());
 ```
 
 Reemplazar `<hash generado>` con el resultado del paso anterior.

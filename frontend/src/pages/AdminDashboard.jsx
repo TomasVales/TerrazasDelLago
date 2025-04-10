@@ -1,6 +1,9 @@
 import { useEffect, useState, useRef } from 'react';
+import { useAuth } from '../context/AuthContext'; // 
+import './AdminDashboard.css';
 
 function AdminDashboard() {
+    const { user, logout } = useAuth();
     const [orders, setOrders] = useState([]);
     const [products, setProducts] = useState([]);
     const [newProduct, setNewProduct] = useState({
@@ -19,14 +22,12 @@ function AdminDashboard() {
     const BACKEND_URL = 'http://localhost:3000';
 
 
-    const token = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MSwicm9sZSI6ImFkbWluIiwiaWF0IjoxNzQ0MDQ5MzA1LCJleHAiOjE3NDQxMzU3MDV9.A76yfsDRqzYLxtzAzMDkbOjDV4Q1GUIarvnYgMi7is4';
-
     // 📦 Traer pedidos
     const fetchOrders = async () => {
         setLoading(true);
         try {
             const response = await fetch('http://localhost:3000/api/orders', {
-                headers: { Authorization: `Bearer ${token}` },
+                headers: { Authorization: `Bearer ${user?.token}` },
             });
             const data = await response.json();
             if (!response.ok) throw new Error(data.message || 'Error al obtener pedidos');
@@ -44,7 +45,7 @@ function AdminDashboard() {
         setLoading(true);
         try {
             const res = await fetch('http://localhost:3000/api/products', {
-                headers: { Authorization: `Bearer ${token}` },
+                headers: { Authorization: `Bearer ${user?.token}` },
             });
             const data = await res.json();
 
@@ -113,10 +114,10 @@ function AdminDashboard() {
     const handleSubmit = async (e) => {
         e.preventDefault();
         setLoading(true);
+        console.log('--- INICIO DE ENVÍO ---');
 
-        const url = editingProduct
-            ? `http://localhost:3000/api/products/${editingProduct.id}`
-            : `http://localhost:3000/api/products`;
+        const BASE_URL = 'http://localhost:3000/api/products';
+        const url = editingProduct ? `${BASE_URL}/${editingProduct.id}` : BASE_URL;
         const method = editingProduct ? 'PUT' : 'POST';
 
         const formData = new FormData();
@@ -125,42 +126,60 @@ function AdminDashboard() {
         formData.append('type', newProduct.type);
         formData.append('description', newProduct.description);
 
+        console.log('Datos del formulario:', {
+            name: newProduct.name,
+            price: newProduct.price,
+            type: newProduct.type,
+            editingProductId: editingProduct?.id
+        });
+
         if (newProduct.imageFile) {
-            // Se eligió una nueva imagen
             formData.append('image', newProduct.imageFile);
+            console.log('Nueva imagen seleccionada:', newProduct.imageFile.name);
         } else if (editingProduct?.image) {
-            // No se eligió imagen nueva, mantener la anterior
             formData.append('existingImage', editingProduct.image);
+            console.log('Manteniendo imagen existente:', editingProduct.image);
         }
 
         try {
+            console.log('Enviando petición a:', url);
             const res = await fetch(url, {
                 method,
-                headers: {
-                    Authorization: `Bearer ${token}`,
-                },
+                headers: { Authorization: `Bearer ${user?.token}` },
                 body: formData,
             });
-            const data = await res.json();
-            if (!res.ok) throw new Error(data.message || 'Error al guardar producto');
 
-            // Limpiar el formulario
-            clearImage();
-            setNewProduct({
-                name: '',
-                price: '',
-                description: '',
-                type: '',
-                imageFile: null,
-                imagePreview: null
+            const data = await res.json();
+            console.log('Respuesta del servidor:', data);
+
+            if (!res.ok) {
+                console.error('Error en respuesta:', data.message);
+                throw new Error(data.message || 'Error al guardar producto');
+            }
+
+            // Actualización directa del estado
+            setProducts(prevProducts => {
+                const updatedProducts = editingProduct
+                    ? prevProducts.map(p =>
+                        p.id === editingProduct.id ? { ...p, ...data } : p
+                    )
+                    : [...prevProducts, data];
+
+                console.log('Estado actualizado:', updatedProducts);
+                return updatedProducts;
             });
+
+            clearImage();
+            setNewProduct({ name: '', price: '', description: '', type: '', imageFile: null, imagePreview: null });
             setEditingProduct(null);
-            fetchProducts();
+            console.log('Formulario reiniciado');
+
         } catch (err) {
-            console.error(err);
+            console.error('Error en handleSubmit:', err);
             setError(err.message);
         } finally {
             setLoading(false);
+            console.log('--- FIN DE ENVÍO ---');
         }
     };
     // 🗑 Eliminar producto
@@ -170,7 +189,7 @@ function AdminDashboard() {
         try {
             const res = await fetch(`http://localhost:3000/api/products/${id}`, {
                 method: 'DELETE',
-                headers: { Authorization: `Bearer ${token}` },
+                headers: { Authorization: `Bearer ${user?.token}` },
             });
             if (!res.ok) throw new Error('Error al eliminar producto');
             fetchProducts();
@@ -203,28 +222,44 @@ function AdminDashboard() {
         setNewProduct({
             ...product,
             imageFile: null,
-            imagePreview: product.image ? `${BACKEND_URL}${product.image}` : null
+            imagePreview: product.image
+                ? `${BACKEND_URL}${product.image}?ts=${Date.now()}` // ¡Cache busting!
+                : null
         });
     };
 
     return (
-        <div style={{
-            padding: '2rem',
-            fontFamily: 'sans-serif',
-            background: '#121212',
-            color: '#eee',
-            minHeight: '100vh'
-        }}>
-            <h1 style={{
-                fontSize: '2.5rem',
-                marginBottom: '2rem',
+        <div className='p-8 font-sans bg-gray-900 text-gray-200 min-h-screen'>
+            <div style={{
                 display: 'flex',
+                justifyContent: 'space-between',
                 alignItems: 'center',
-                gap: '1rem'
+                marginBottom: '2rem'
             }}>
-                <span>Admin Dashboard</span>
-                {loading && <span style={{ fontSize: '1rem' }}>Cargando...</span>}
-            </h1>
+                <div style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '1rem',
+                    fontSize: '2.5rem'
+                }}>
+                    <span>Admin Dashboard</span>
+                    {loading && <span style={{ fontSize: '1rem' }}>Cargando...</span>}
+                </div>
+                <button
+                    onClick={logout}
+                    style={{
+                        background: '#ff4444',
+                        color: '#fff',
+                        border: 'none',
+                        padding: '0.5rem 1rem',
+                        borderRadius: '5px',
+                        cursor: 'pointer',
+                        fontWeight: 'bold'
+                    }}
+                >
+                    Cerrar sesión
+                </button>
+            </div>
 
             {error && (
                 <div style={{
@@ -238,6 +273,8 @@ function AdminDashboard() {
                 </div>
             )}
 
+
+
             {/* Navegación por pestañas */}
             <div style={{
                 display: 'flex',
@@ -248,15 +285,12 @@ function AdminDashboard() {
             }}>
                 <button
                     onClick={() => setActiveTab('products')}
-                    style={{
-                        background: activeTab === 'products' ? '#4fc3f7' : 'transparent',
-                        color: activeTab === 'products' ? '#121212' : '#eee',
-                        border: 'none',
-                        padding: '0.5rem 1rem',
-                        borderRadius: '5px',
-                        cursor: 'pointer'
-                    }}
-                >
+                    className={`
+                    ${activeTab === 'products' ? 'bg-sky-300 text-gray-900' : 'bg-transparent text-gray-200'}
+                    border-none
+                    px-4 py-2
+                    rounded-md
+                    cursor-pointer`}>
                     Productos
                 </button>
                 <button
@@ -268,8 +302,7 @@ function AdminDashboard() {
                         padding: '0.5rem 1rem',
                         borderRadius: '5px',
                         cursor: 'pointer'
-                    }}
-                >
+                    }}>
                     Pedidos
                 </button>
             </div>
@@ -405,6 +438,8 @@ function AdminDashboard() {
                                 </div>
                             </div>
 
+
+
                             <div style={{
                                 display: 'grid',
                                 gap: '1.5rem',
@@ -431,10 +466,12 @@ function AdminDashboard() {
                                         }}
                                     >
                                         <option value="">Seleccionar tipo</option>
-                                        <option value="comida">Comida</option>
-                                        <option value="bebida">Bebida</option>
-                                        <option value="postre">Postre</option>
-                                        <option value="snack">Snack</option>
+                                        <option value="Burguers">Burguers</option>
+                                        <option value="Carnes">Carnes</option>
+                                        <option value="Pastas">Pastas</option>
+                                        <option value="Minutas">Minutas</option>
+                                        <option value="Vinos">Vinos</option>
+                                        <option value="Bebidas">Bebidas</option>
                                     </select>
                                 </div>
 
@@ -614,7 +651,7 @@ function AdminDashboard() {
                                 >
                                     {product.image && (
                                         <img
-                                            src={`${BACKEND_URL}${product.image}`}
+                                            src={`${BACKEND_URL}${product.image}?ts=${Date.now()}`}
                                             alt={product.name}
                                             style={{
                                                 width: '100%',
@@ -624,6 +661,10 @@ function AdminDashboard() {
                                                 marginBottom: '1rem',
                                                 border: '1px solid #444'
                                             }}
+                                            onError={(e) => {
+                                                e.target.src = '/placeholder.jpg'; // Imagen de respaldo si falla la carga
+                                            }}
+                                            key={`img-${product.id}-${Date.now()}`} // Fuerza re-render cuando cambia
                                         />
                                     )}
 
