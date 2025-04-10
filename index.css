@@ -1,0 +1,19 @@
+@import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@400..900&family=EB+Garamond:ital,wght@0,400..800;1,400..800&family=PT+Serif:ital,wght@0,400;0,700;1,400;1,700&family=Playfair+Display:ital,wght@0,400..900;1,400..900&family=Tangerine&display=swap');
+@import "tailwindcss";
+
+@theme{
+    --font-pt: "PT Serif", serif;
+
+    --breakpoint-xx: 1275px;
+    --breakpoint-xs: 300px;
+    --breakpoint-ss: 360px;
+    --breakpoint-s:  580px;
+    --breakpoint-m:  495px;
+    --breakpoint-mi: 460px;
+    --breakpoint-si: 425px;
+}
+
+/* Scrollbar visible solo en navegadores basados en Webkit */
+.custom-scroll::-webkit-scrollbar {
+    width: 0px;
+  }
