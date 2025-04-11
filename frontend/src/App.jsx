@@ -1,19 +1,31 @@
 import { useAuth } from './context/AuthContext';
-import Login from './pages/Login';
-import Register from './pages/Register';
 import AdminDashboard from './pages/AdminDashboard';
-import { useState } from 'react';
-
-import './App.css'
+import Auth from './pages/Auth';
+import './App.css';
 
 import MenuNav from './assets/MenuNav';
 import Cartel from './assets/Cartel';
 import Cards from './assets/Cards';
 import Comida from './assets/Comida';
+import Transferencia from './pages/Transferencia'; // ✅ Importamos la vista
+
+import { useState } from 'react';
 
 function App() {
   const { user, loading, logout } = useAuth();
-  const [showRegister, setShowRegister] = useState(false);
+  const [cartItems, setCartItems] = useState([]);
+  const [mostrarTransferencia, setMostrarTransferencia] = useState(false); // ✅ Estado para la pantalla de transferencia
+
+  const addToCart = (product) => {
+    const exists = cartItems.find(item => item.id === product.id);
+    if (exists) {
+      setCartItems(cartItems.map(item =>
+        item.id === product.id ? { ...item, cantidad: item.cantidad + 1 } : item
+      ));
+    } else {
+      setCartItems([...cartItems, { ...product, cantidad: 1 }]);
+    }
+  };
 
   if (loading) return <p style={{ padding: '2rem' }}>Cargando...</p>;
 
@@ -38,24 +50,28 @@ function App() {
   );
 
   if (user) {
-    return user.role === 'admin' ? (
-      <AdminDashboard />
-    ) : (
+    if (user.role === 'admin') return <AdminDashboard />;
+
+    if (mostrarTransferencia) {
+      return <Transferencia onVolver={() => setMostrarTransferencia(false)} />;
+    }
+
+    return (
       <div>
         <LogoutButton />
-        <MenuNav />
+        <MenuNav
+          cartItems={cartItems}
+          setCartItems={setCartItems}
+          setMostrarTransferencia={setMostrarTransferencia} // ✅ Pasamos la función
+        />
         <Cartel />
         <Cards />
-        <Comida />
+        <Comida addToCart={addToCart} />
       </div>
     );
   }
 
-  return showRegister ? (
-    <Register goBack={() => setShowRegister(false)} />
-  ) : (
-    <Login onRegisterClick={() => setShowRegister(true)} />
-  );
+  return <Auth />;
 }
 
 export default App;

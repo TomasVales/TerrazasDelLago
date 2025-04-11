@@ -2,9 +2,9 @@ import React, { useEffect, useState } from 'react';
 
 const tiposDisponibles = ['Burguers', 'Carnes', 'Pastas', 'Minutas', 'Vinos', 'Bebidas'];
 
-const Comida = () => {
+const Comida = ({ addToCart }) => {
   const [productos, setProductos] = useState([]);
-  const [selectedTipo, setSelectedTipo] = useState(''); // Estado del filtro
+  const [selectedTipo, setSelectedTipo] = useState('');
 
   useEffect(() => {
     const fetchProductos = async () => {
@@ -20,7 +20,6 @@ const Comida = () => {
     fetchProductos();
   }, []);
 
-  // 🔍 Aplicar filtro si hay uno seleccionado
   const productosFiltrados = selectedTipo
     ? productos.filter((producto) => producto.type === selectedTipo)
     : productos;
@@ -56,7 +55,7 @@ const Comida = () => {
           </div>
         </div>
 
-        {/* Filtro precio (sin funcionalidad aún) */}
+        {/* Filtro precio (visual) */}
         <div>
           <p className='font-bold text-gray-700'>Filtro Precio</p>
           <div className='flex justify-between max-w-[270px] w-full'>
@@ -81,13 +80,24 @@ const Comida = () => {
               src={`http://localhost:3000${producto.image}`}
               alt={producto.name}
             />
-            <div className='flex xx:flex-row xs:flex-col justify-between px-3 py-4'>
-              <p className='font-bold'>{producto.name}</p>
-              <p>
+            <div className='flex flex-col justify-between px-3 py-4 gap-2'>
+              <div className='flex justify-between items-center'>
+                <p className='font-bold'>{producto.name}</p>
                 <span className='bg-[#208850] text-white p-1 rounded-full'>
                   ${parseFloat(producto.price).toLocaleString('es-AR')}
                 </span>
-              </p>
+              </div>
+              <button
+                onClick={() => addToCart({
+                  id: producto.id,
+                  nombre: producto.name,
+                  precio: parseFloat(producto.price),
+                  imagen: `http://localhost:3000${producto.image}`
+                })}
+                className='bg-[#208850] text-white py-2 px-3 rounded-lg hover:bg-[#176f40] transition-all'
+              >
+                Agregar al carrito
+              </button>
             </div>
           </div>
         ))}

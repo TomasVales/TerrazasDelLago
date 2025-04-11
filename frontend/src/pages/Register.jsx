@@ -3,7 +3,7 @@ import Login from './Login';
 import Logo from '../assets/logo3.webp';
 import Image from '../assets/imagen.webp';
 
-function Register() {
+function Register({ onSwitch }) {
     const [form, setForm] = useState({
         name: '',
         email: '',
@@ -12,10 +12,6 @@ function Register() {
 
     const [message, setMessage] = useState('');
 
-    const [showLogin, setShowLogin] = useState(false);
-    if (showLogin) {
-        return <Login />
-    }
 
     const handleSubmit = async (e) => {
         e.preventDefault();
@@ -38,12 +34,12 @@ function Register() {
     };
 
     return (
-        <div className="bg-gray-100 flex justify-center items-center h-screen">
+        <div className="flex justify-center items-center min-h-screen bg-gray-100">
 
             {/* Formulario a la izquierda */}
-            <div className="p-6 sm:p-2 md:p-2 lg:p-36 w-full sm:w-1/2">
+            <div className="p-6 sm:p-2 md:p-4 lg:p-10 xl:p-12 w-full sm:w-1/2 max-h-[90vh] overflow-y-auto">
                 <img src={Logo} alt="Logo" className='w-36 h-auto rounded-[50%] mx-auto pb-1 shadow-2xl' />
-                <h1 className="text-5xl pt-5 text-center font-semibold mb-5">Registro</h1>
+                <h1 className="text-5xl pt-5 text-center font-semibold mb-5">Regístrate</h1>
                 <form action="#" method="POST">
 
                     {/* Nombre */}
@@ -83,11 +79,17 @@ function Register() {
 
                     {/* Botón */}
                     <button type="submit"
-                        className="bg-emerald-600 hover:bg-emerald-700 hover:border-green-950 cursor-pointer text-white font-semibold rounded-md py-2 px-4 w-full">Register</button>
+                        className="bg-emerald-600 hover:bg-emerald-800 hover:border-y-green-900 cursor-pointer text-white font-semibold rounded-md py-2 px-4 w-full">Registrarse</button>
                 </form>
 
                 <div className="mt-6 text-gray-600 text-center">
-                    Ya tienes una cuenta? <a onClick={() => setShowLogin(true)} className="text-emerald-600 cursor-pointer hover:underline">Inicia sesión</a>
+                    ¿Ya tienes una cuenta?{' '}
+                    <button
+                        onClick={onSwitch}
+                        className="text-emerald-600 hover:underline bg-transparent border-none cursor-pointer"
+                    >
+                        Iniciar sesión
+                    </button>
                 </div>
             </div>
 
