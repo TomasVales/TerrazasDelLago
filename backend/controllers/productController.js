@@ -80,7 +80,7 @@ const updateProduct = async (req, res) => {
                     fs.unlinkSync(oldImagePath);
                 }
             }
-            imagePath = '/uploads/products/' + req.file.filename;
+            imagePath = '/uploads/' + req.file.filename;
         }
 
         await product.update({ name, image: imagePath, type, price });

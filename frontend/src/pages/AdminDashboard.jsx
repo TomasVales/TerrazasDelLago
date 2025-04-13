@@ -211,7 +211,12 @@ function AdminDashboard() {
                                         <tr key={product.id} className="border-t border-gray-700">
                                             <td className="p-2 text-gray-400">#{index + 1}</td>
                                             <td className="p-2">
-                                                <img src={`${BACKEND_URL}${product.image}`} alt={product.name} className="w-12 h-12 object-cover rounded" onError={(e) => e.target.src = '/placeholder.jpg'} />
+                                                <img
+                                                    src={`${BACKEND_URL}${product.image}?ts=${Date.now()}`} // 🚀 AÑADIR ESTO
+                                                    alt={product.name}
+                                                    className="w-12 h-12 object-cover rounded"
+                                                    onError={(e) => e.target.src = '/placeholder.jpg'}
+                                                />
                                             </td>
                                             <td className="p-2">{product.name}</td>
                                             <td className="p-2 text-sm text-gray-400">{product.description?.slice(0, 50)}...</td>
