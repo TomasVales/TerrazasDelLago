@@ -1,10 +1,20 @@
 import React, { useEffect, useState } from 'react';
+import { Slide, ToastContainer, toast} from 'react-toastify';
 
 const tiposDisponibles = ['Burguers', 'Carnes', 'Pastas', 'Minutas', 'Vinos', 'Bebidas'];
 
 const Comida = ({ addToCart }) => {
   const [productos, setProductos] = useState([]);
   const [selectedTipo, setSelectedTipo] = useState('');
+
+  const notify = () => {
+    //Posicionamiento del toast
+  toast.success("Pedido Realizado", {
+    transition: Slide,
+  });
+}
+
+
 
   useEffect(() => {
     const fetchProductos = async () => {
@@ -25,15 +35,15 @@ const Comida = ({ addToCart }) => {
     : productos;
 
   return (
+    
     <div className='max-w-[1640px] m-auto px-4 py-7'>
       <h1 className='text-[#208850] font-bold text-4xl text-center'>Menu de Opciones</h1>
-
       {/* Filtros */}
       <div className='flex flex-col lg:flex-row justify-between pt-10'>
 
         {/* Filtro tipo */}
         <div className='max-w-[590px]'>
-          <p className='font-bold text-gray-700'>Filtro Comidas</p>
+          <p className='font-bold text-gray-700'>Categorias</p>
           <div className='flex justify-between flex-wrap'>
             <button
               onClick={() => setSelectedTipo('')}
@@ -54,24 +64,10 @@ const Comida = ({ addToCart }) => {
             ))}
           </div>
         </div>
-
-        {/* Filtro precio (visual) */}
-        <div>
-          <p className='font-bold text-gray-700'>Filtro Precio</p>
-          <div className='flex justify-between max-w-[270px] w-full'>
-            {['$', '$$', '$$$', '$$$$'].map((price, i) => (
-              <button
-                key={i}
-                className='m-1 cursor-pointer border-[#208850] border text-[#208850] py-2 px-3 rounded-[14px] hover:bg-[#208850] hover:text-white'
-              >
-                {price}
-              </button>
-            ))}
-          </div>
-        </div>
       </div>
 
       {/* Productos dinámicos */}
+      
       <div className='grid grid-cols-2 lg:grid-cols-4 gap-6 pt-5'>
         {productosFiltrados.map((producto) => (
           <div key={producto.id} className='shadow-lg hover:scale-105 duration-300 rounded-lg'>
@@ -87,13 +83,18 @@ const Comida = ({ addToCart }) => {
                   ${parseFloat(producto.price).toLocaleString('es-AR')}
                 </span>
               </div>
+              <div>
+              </div>
               <button
-                onClick={() => addToCart({
-                  id: producto.id,
-                  nombre: producto.name,
-                  precio: parseFloat(producto.price),
-                  imagen: `http://localhost:3000${producto.image}`
-                })}
+                onClick={() => {
+                  addToCart({
+                    id: producto.id,
+                    nombre: producto.name,
+                    precio: parseFloat(producto.price),
+                    imagen: `http://localhost:3000${producto.image}`
+                  });
+                   notify(); 
+                }}
                 className='bg-[#208850] text-white py-2 px-3 rounded-lg hover:bg-[#176f40] transition-all'
               >
                 Agregar al carrito

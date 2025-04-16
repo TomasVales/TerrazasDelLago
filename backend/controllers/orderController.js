@@ -100,11 +100,16 @@ const getAllOrders = async (req, res) => {
 const updateOrderStatus = async (req, res) => {
     try {
         const { id } = req.params;
-        const { status } = req.body;
+        const { status } = req.body; // El estado viene del frontend
 
         const order = await Order.findByPk(id);
         if (!order) {
             return res.status(404).json({ message: 'Pedido no encontrado.' });
+        }
+
+        // Asegúrate de que el estado esté dentro de los valores posibles
+        if (!['pending', 'completed', 'canceled'].includes(status)) {
+            return res.status(400).json({ message: 'Estado no válido.' });
         }
 
         order.status = status;

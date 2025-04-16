@@ -177,9 +177,6 @@ const MenuNav = ({ cartItems, setCartItems, setMostrarTransferencia }) => {
                                                 <span className='font-semibold text-black'>+</span>
                                             </button>
                                         </div>
-
-
-
                                         <button
                                             onClick={() => removeItem(item.id)}
                                             className='mr-[9px] cursor-pointer hover:scale-105 duration-300'

@@ -88,7 +88,7 @@ function Login({ onSwitch }) {
                 <img src={Image} alt="Image" className="object-cover w-full h-full" />
             </div>
 
-            <div className="p-6 sm:p-2 md:p-2 lg:p-36 w-full sm:w-1/2">
+            <div className="p-6 sm:p-2 md:p-4 lg:p-10 xl:p-12 w-full sm:w-1/2 max-h-[90vh] overflow-y-auto">
                 <img src={Logo} alt="Logo" className="w-36 h-auto rounded-[50%] mx-auto pb-1 shadow-2xl" />
                 <h1 className="text-5xl pt-5 text-center font-semibold mb-5">Iniciar Sesión</h1>
 

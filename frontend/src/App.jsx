@@ -3,10 +3,11 @@ import AdminDashboard from './pages/AdminDashboard';
 import Auth from './pages/Auth';
 import './App.css';
 
-import MenuNav from './assets/MenuNav';
-import Cartel from './assets/Cartel';
-import Cards from './assets/Cards';
-import Comida from './assets/Comida';
+import Menu from './pages/Menu';
+import Cartel from './components/Cartel';
+import Cards from './components/Cards';
+import Comida from './components/Comida';
+import { ToastContainer } from 'react-toastify'
 import Transferencia from './pages/Transferencia'; // ✅ Importamos la vista
 
 import { useState } from 'react';
@@ -32,18 +33,7 @@ function App() {
   const LogoutButton = () => (
     <button
       onClick={logout}
-      style={{
-        position: 'fixed',
-        top: '1rem',
-        right: '1rem',
-        zIndex: 9999,
-        padding: '0.5rem 1rem',
-        backgroundColor: '#f44336',
-        color: 'white',
-        border: 'none',
-        borderRadius: '5px',
-        cursor: 'pointer',
-      }}
+      className='fixed top-4 right-4 z-[9999] px-4 py-2 bg-red-600 hover:bg-red-700 text-white border-none rounded-[5px] cursor-pointer'
     >
       Logout
     </button>
@@ -58,14 +48,18 @@ function App() {
 
     return (
       <div>
-        <LogoutButton />
-        <MenuNav
+        <Menu
           cartItems={cartItems}
           setCartItems={setCartItems}
-          setMostrarTransferencia={setMostrarTransferencia} // ✅ Pasamos la función
+          setMostrarTransferencia={setMostrarTransferencia}
+          logout={logout}
         />
         <Cartel />
         <Cards />
+        <ToastContainer 
+        limit={3}
+        autoClose={2000}    
+        />  
         <Comida addToCart={addToCart} />
       </div>
     );
