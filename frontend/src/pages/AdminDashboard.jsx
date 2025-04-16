@@ -1,10 +1,12 @@
 import { useEffect, useState, useRef } from 'react';
 import { useAuth } from '../context/AuthContext';
-import SidebarAdmin, { SidebarItem } from './SidebarAdmin';
-import LayoutAdmin from './layoutAdmin';
-import ProdAdmin from './ProdAdmin';
-import OrderAdmin from './OrderAdmin';
-import HeaderAdmin from './HeaderAdmin';
+import SidebarAdmin, { SidebarItem } from '../components/Admin/SiderbarAdmin';
+import LayoutAdmin from '../components/Admin/LayoutAdmin';
+import ProdAdmin from '../components/Admin/ProdAdmin';
+import OrderAdmin from '../components/Admin/OrderAdmin';
+import UserAdmin from '../components/Admin/UserAdmin';
+import HeaderAdmin from '../components/Admin/HeaderAdmin';
+import UserProfile from '../components/Admin/UserProfile';
 import { ShoppingCart, LayoutDashboard, Package, Users } from "lucide-react";
 
 function AdminDashboard() {
@@ -148,7 +150,7 @@ function AdminDashboard() {
     return (
         <div className='min-h-screen xs:flex'>
             <div>
-                <SidebarAdmin>
+                <SidebarAdmin setActiveItem={setActiveItem}>
                     <SidebarItem icon={<LayoutDashboard size={20} />} text="Home"
                         active={activeItem === 'Home'}
                         onClick={() => setActiveItem('Home')} />
@@ -161,6 +163,9 @@ function AdminDashboard() {
                     <SidebarItem icon={<Users size={20} />} text="Usuarios"
                         active={activeItem === 'Usuarios'}
                         onClick={() => setActiveItem('Usuarios')} />
+                    <SidebarItem icon={<Users size={20} />} text="Perfil"
+                        active={activeItem === 'Perfil'}
+                        onClick={() => setActiveItem('Perfil')} />
                 </SidebarAdmin>
             </div>
             <div className='flex-1 transition-all duration-300 ease-in-out'>
@@ -168,6 +173,8 @@ function AdminDashboard() {
                 {activeItem === 'Home' && <LayoutAdmin />}
                 {activeItem === 'Productos' && <ProdAdmin />}
                 {activeItem === 'Pedidos' && <OrderAdmin />}
+                {activeItem === 'Usuarios' && <UserAdmin />}
+                {activeItem === 'Perfil' && <UserProfile />}
             </div>
         </div>
     );

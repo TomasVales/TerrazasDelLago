@@ -8,6 +8,8 @@ const User = require('../models/user');
 const Order = require('../models/order');
 const OrderItem = require('../models/orderItem');
 const Product = require('../models/products');
+const userRoutes = require('../routes/userRoutes');
+const statsRoutes = require('../routes/statsRoutes');
 const orderRoutes = require('../routes/orderRoutes');
 require('../models/associations'); // <-- importa relaciones
 
@@ -23,6 +25,8 @@ app.use('/uploads', express.static(path.join(__dirname, '../public/uploads')));
 app.use('/api/auth', authRoutes);
 app.use('/api/orders', orderRoutes);
 app.use('/api/products', productRoutes);
+app.use('/api/users', userRoutes);
+app.use('/api/stats', statsRoutes);
 
 
 

@@ -108,7 +108,7 @@ const updateOrderStatus = async (req, res) => {
         }
 
         // Asegúrate de que el estado esté dentro de los valores posibles
-        if (!['pending', 'completed', 'canceled'].includes(status)) {
+        if (!['pending', 'completed', 'cancelled'].includes(status)) {
             return res.status(400).json({ message: 'Estado no válido.' });
         }
 
