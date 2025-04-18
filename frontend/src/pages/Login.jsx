@@ -3,6 +3,8 @@ import ReCAPTCHA from 'react-google-recaptcha';
 import { useAuth } from '../context/AuthContext';
 import Image from '../../src/assets/nuevoquilmes.webp';
 import Logo from '../../src/assets/logo3.webp';
+import { useNavigate } from 'react-router-dom';
+
 
 function Login({ onSwitch }) {
     const { login } = useAuth();
@@ -12,6 +14,7 @@ function Login({ onSwitch }) {
     const [rememberMe, setRememberMe] = useState(false);
     const [captchaVisible, setCaptchaVisible] = useState(false);
     const [captchaToken, setCaptchaToken] = useState(null);
+    const navigate = useNavigate();
 
     useEffect(() => {
         if (!window.google) return;
@@ -58,6 +61,8 @@ function Login({ onSwitch }) {
                 email: data.user.email,
             });
 
+
+
             setCaptchaToken(null);
             setCaptchaVisible(false);
 
@@ -66,6 +71,8 @@ function Login({ onSwitch }) {
             } else {
                 localStorage.removeItem('rememberedEmail');
             }
+
+
         } catch (err) {
             console.error(err);
             setMessage('Login fallido: ' + err.message);

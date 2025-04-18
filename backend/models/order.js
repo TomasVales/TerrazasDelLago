@@ -17,7 +17,7 @@ const Order = sequelize.define('Order', {
     notes: {
         type: DataTypes.TEXT,
         allowNull: true
-    }
+    },
 });
 
 module.exports = Order;

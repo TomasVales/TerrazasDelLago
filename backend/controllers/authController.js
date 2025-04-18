@@ -3,11 +3,15 @@ const jwt = require('jsonwebtoken');
 const axios = require('axios');
 const { OAuth2Client } = require('google-auth-library');
 const User = require('../models/user');
+const { validationResult } = require('express-validator');
 
 const client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
 
 // Registro con validación de reCAPTCHA
 const register = async (req, res) => {
+    const errors = validationResult(req);
+    if (!errors.isEmpty())
+        return res.status(400).json({ errors: errors.array() });
     try {
         const { name, email, password, captchaToken } = req.body;
 
@@ -41,6 +45,9 @@ const register = async (req, res) => {
 
 // Login clásico con validación de reCAPTCHA
 const login = async (req, res) => {
+    const errors = validationResult(req);
+    if (!errors.isEmpty())
+        return res.status(400).json({ errors: errors.array() });
     try {
         const { email, password, captchaToken } = req.body;
 

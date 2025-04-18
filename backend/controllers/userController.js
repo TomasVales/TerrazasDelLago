@@ -31,6 +31,9 @@ const getCurrentUser = async (req, res) => {
 
 // PUT /api/users/me
 const updateUserProfile = async (req, res) => {
+    const errors = validationResult(req);
+    if (!errors.isEmpty())
+        return res.status(400).json({ errors: errors.array() });
     try {
         const user = await User.findByPk(req.user.id);
         if (!user) return res.status(404).json({ message: 'Usuario no encontrado' });

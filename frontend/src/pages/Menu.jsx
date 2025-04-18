@@ -17,6 +17,8 @@ const Menu = ({ cartItems, setCartItems, setMostrarTransferencia, logout }) => {
     const [paymentMethod, setPaymentMethod] = useState('');
     const [deliveryMethod, setDeliveryMethod] = useState('');
     const [address, setAddress] = useState('');
+    const deliveryMethodFinal = deliveryMethod === 'envio' ? 'domicilio' : 'local';
+
 
     const increase = (id) => {
         setCartItems(prev =>
@@ -62,6 +64,18 @@ const Menu = ({ cartItems, setCartItems, setMostrarTransferencia, logout }) => {
 
         const direccionFinal = deliveryMethod === 'envio' ? address : 'Retiro en el local';
 
+        // 👇 PONÉ ESTO PARA VERIFICAR LOS DATOS QUE SE MANDAN
+        console.log("➡ Enviando pedido con:", {
+            token,
+            items: cartItems.map(item => ({
+                productId: item.id,
+                quantity: item.cantidad
+            })),
+            address: direccionFinal,
+            paymentMethod,
+            deliveryMethod
+        });
+
         try {
             const response = await fetch("http://localhost:3000/api/orders", {
                 method: "POST",
@@ -75,32 +89,30 @@ const Menu = ({ cartItems, setCartItems, setMostrarTransferencia, logout }) => {
                         quantity: item.cantidad
                     })),
                     address: direccionFinal,
-                    paymentMethod,
-                    deliveryMethod,
                     notes: `Pedido generado desde frontend (${paymentMethod} - ${deliveryMethod})`
                 })
+
             });
 
             const data = await response.json();
-            if (!response.ok) throw new Error(data.message);
+            if (!response.ok) throw new Error(data.message || "Error al guardar el pedido");
 
-            // Después de guardar en backend, prepara el mensaje WhatsApp
+            // ✅ Armar el mensaje de WhatsApp con ID real del pedido
             const mensaje = `
-            PEDIDO: *TER-${data.id || Math.random().toString(36).substring(2, 7).toUpperCase()}* 
-            Estado del pago: Pendiente
-            ${cartItems.map(item => `— ${item.nombre} (x${item.cantidad}) > *$${(item.precio * item.cantidad).toLocaleString('es-AR')}*`).join('\n')}
-            *Total: $${total.toLocaleString('es-AR')}*
-            Forma de pago: *${paymentMethod.charAt(0).toUpperCase() + paymentMethod.slice(1)}*
-            Método de entrega: *${deliveryMethod === 'retiro' ? 'Retiro en el comercio' : 'Envío a domicilio'}*
-            Dirección de envío: *${direccionFinal}*
-            Aclaraciones del pedido: *Pedido generado desde la web*
+    PEDIDO: *TER-${data.id || Math.random().toString(36).substring(2, 7).toUpperCase()}* 
+    Estado del pago: Pendiente
+    ${cartItems.map(item => `— ${item.nombre} (x${item.cantidad}) > *$${(item.precio * item.cantidad).toLocaleString('es-AR')}*`).join('\n')}
+    *Total: $${total.toLocaleString('es-AR')}*
+    Forma de pago: *${paymentMethod.charAt(0).toUpperCase() + paymentMethod.slice(1)}*
+    Método de entrega: *${deliveryMethod === 'retiro' ? 'Retiro en el comercio' : 'Envío a domicilio'}*
+    Dirección de envío: *${direccionFinal}*
+    Aclaraciones del pedido: *Pedido generado desde la web*
             `;
 
             const urlWhatsapp = `https://wa.me/5491151393916?text=${encodeURIComponent(mensaje)}`;
+            window.open(urlWhatsapp, "_blank");
 
-            window.open(urlWhatsapp, "_blank");  // abre WhatsApp
-
-            // Limpieza final del carrito
+            // 🧹 Limpieza final
             setCartItems([]);
             setAddress('');
             setPaymentMethod('');
@@ -108,11 +120,10 @@ const Menu = ({ cartItems, setCartItems, setMostrarTransferencia, logout }) => {
             setIsCartOpen(false);
 
         } catch (error) {
-            console.error("Error:", error);
+            console.error("Error al confirmar orden:", error);
             alert("No se pudo completar la orden.");
         }
     };
-
     return (
         <div className='max-w-screen flex justify-between items-center p-4 overflow-x-hidden'>
             {/* Lado izquierdo */}

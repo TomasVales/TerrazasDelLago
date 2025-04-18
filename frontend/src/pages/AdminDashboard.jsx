@@ -6,6 +6,7 @@ import ProdAdmin from '../components/Admin/ProdAdmin';
 import OrderAdmin from '../components/Admin/OrderAdmin';
 import UserAdmin from '../components/Admin/UserAdmin';
 import HeaderAdmin from '../components/Admin/HeaderAdmin';
+import { useNavigate } from 'react-router-dom';
 import UserProfile from '../components/Admin/UserProfile';
 import { FaSignOutAlt } from "react-icons/fa";
 
@@ -17,6 +18,7 @@ function AdminDashboard() {
     const [orders, setOrders] = useState([]);
     const [products, setProducts] = useState([]);
     const [searchQuery, setSearchQuery] = useState('');
+    const navigate = useNavigate();
     const [activeItem, setActiveItem] = useState('Home');
     const [newProduct, setNewProduct] = useState({
         name: '',
@@ -31,12 +33,13 @@ function AdminDashboard() {
     const [loading, setLoading] = useState(false);
     const [activeTab, setActiveTab] = useState('products');
     const fileInputRef = useRef(null);
-    const BACKEND_URL = 'http://localhost:3000';
+    const BACKEND_URL = import.meta.env.VITE_BACKEND_URL;
 
     useEffect(() => {
-        if (activeTab === 'orders') fetchOrders();
-        else fetchProducts();
-    }, [activeTab]);
+        if (!user && !loading) {
+            navigate('/login');
+        }
+    }, [user, loading]);
 
     const fetchOrders = async () => {
         setLoading(true);

@@ -2,9 +2,15 @@ const Order = require('../models/order');
 const OrderItem = require('../models/orderItem');
 const Product = require('../models/products');
 const User = require('../models/user');
+const { validationResult } = require('express-validator');
 
 // Crear nuevo pedido
 const createOrder = async (req, res) => {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+        return res.status(400).json({ errors: errors.array() });
+    }
+
     try {
         const userId = req.user.id;
         const { items, address, notes } = req.body;
@@ -13,7 +19,7 @@ const createOrder = async (req, res) => {
             return res.status(400).json({ message: 'El pedido no contiene productos.' });
         }
 
-        // Crear el pedido vacío con total = 0 por ahora
+        // Crear el pedido con total 0 por ahora
         const order = await Order.create({
             userId,
             total: 0,
@@ -23,7 +29,6 @@ const createOrder = async (req, res) => {
 
         let total = 0;
 
-        // Insertar los ítems uno por uno
         for (const item of items) {
             const product = await Product.findByPk(item.productId);
             if (!product) {
@@ -41,11 +46,10 @@ const createOrder = async (req, res) => {
             });
         }
 
-        // Actualizar el total del pedido
+        // Guardar el total calculado
         order.total = total;
         await order.save();
 
-        // 👉 Buscar y devolver el pedido completo con relaciones
         const fullOrder = await Order.findByPk(order.id, {
             include: [
                 { model: User, attributes: ['name', 'email'] },

@@ -16,12 +16,15 @@ const Comida = ({ addToCart }) => {
 
   useEffect(() => {
     const fetchProductos = async () => {
+      const url = `${import.meta.env.VITE_BACKEND_URL}/api/products`;
+      console.log('🌍 Fetching productos desde:', url);
       try {
-        const response = await fetch('http://localhost:3000/api/products');
+        const response = await fetch(url);
         const data = await response.json();
+        console.log('✅ Productos recibidos:', data);
         setProductos(data);
       } catch (error) {
-        console.error('Error al obtener los productos:', error);
+        console.error('❌ Error al obtener los productos:', error);
       }
     };
 
@@ -72,7 +75,8 @@ const Comida = ({ addToCart }) => {
           <div key={producto.id} className='shadow-lg hover:scale-105 duration-300 rounded-lg'>
             <img
               className='w-full h-[200px] object-cover rounded-t-lg'
-              src={`http://localhost:3000${producto.image}`}
+              src={`${import.meta.env.VITE_BACKEND_URL}${producto.image}`}
+
               alt={producto.name}
             />
             <div className='flex flex-col justify-between px-3 py-4 gap-2'>
@@ -88,7 +92,7 @@ const Comida = ({ addToCart }) => {
                     id: producto.id,
                     nombre: producto.name,
                     precio: parseFloat(producto.price),
-                    imagen: `http://localhost:3000${producto.image}`
+                    imagen: `${import.meta.env.VITE_BACKEND_URL}${producto.image}`
                   });
                   notify();
                 }}

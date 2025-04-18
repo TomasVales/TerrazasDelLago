@@ -1,7 +1,7 @@
 const Product = require('../models/products');
 const fs = require('fs');
 const path = require('path');
-
+const { validationResult } = require('express-validator');
 const backendDir = path.resolve(__dirname, '..');
 const uploadDir = path.join(backendDir, 'public', 'uploads');
 
@@ -16,6 +16,10 @@ const getAllProducts = async (req, res) => {
 };
 
 const createProduct = async (req, res) => {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+        return res.status(400).json({ errors: errors.array() });
+    }
     try {
         const { name, type, price, description } = req.body;
 
@@ -65,6 +69,10 @@ const getProductById = async (req, res) => {
 
 
 const updateProduct = async (req, res) => {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+        return res.status(400).json({ errors: errors.array() });
+    }
     try {
         const { name, type, price, existingImage } = req.body;
 

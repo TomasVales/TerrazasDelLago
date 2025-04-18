@@ -13,43 +13,68 @@ function Register({ onSwitch }) {
 
     const [captchaToken, setCaptchaToken] = useState(null);
     const [message, setMessage] = useState('');
+    const [errores, setErrores] = useState([]);
+    const erroresTemp = [];
+    const nameRegex = /^[A-Za-zÁÉÍÓÚáéíóúÑñ\s]+$/;
 
     const handleSubmit = async (e) => {
         e.preventDefault();
+        setMessage('');
+        setErrores([]); // ✅ si usás un array de errores múltiples
+
+
+        if (!nameRegex.test(form.name)) {
+            erroresTemp.push({ msg: 'El nombre solo debe contener letras y espacios' });
+        }
 
         if (form.password !== form.confirmPassword) {
-            setMessage('❌ Las contraseñas no coinciden');
-            return;
+            erroresTemp.push({ msg: 'Las contraseñas no coinciden' });
         }
 
         if (!captchaToken) {
-            setMessage('❌ Por favor verifica que no sos un robot.');
+            erroresTemp.push({ msg: 'Por favor verifica que no sos un robot.' });
+        }
+
+        if (erroresTemp.length > 0) {
+            setErrores(erroresTemp);
             return;
         }
 
         try {
-            const res = await fetch('http://localhost:3000/api/auth/register', {
+            const res = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/auth/register`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
                     name: form.name,
                     email: form.email,
                     password: form.password,
-                    captchaToken: captchaToken, // 👈 mandamos el token al backend
+                    captchaToken: captchaToken,
                 }),
             });
 
             const data = await res.json();
 
-            if (!res.ok) throw new Error(data.message || 'Error en el registro');
+            if (!res.ok) {
+                console.log('🛑 Errores del backend:', data);
+                if (data.errors && Array.isArray(data.errors)) {
+                    setErrores(data.errors);
+                } else {
+                    setMessage('❌ ' + (data.message || 'Error en el registro'));
+                }
+                return;
+            }
 
+            // ✅ Registro exitoso
             setMessage('✅ Usuario creado. Ahora podés iniciar sesión.');
             setForm({ name: '', email: '', password: '', confirmPassword: '' });
             setCaptchaToken(null);
+            setErrores([]);
         } catch (err) {
-            setMessage('❌ ' + err.message);
+            console.error(err);
+            setMessage('❌ Error inesperado. Intentalo de nuevo más tarde.');
         }
     };
+
 
     return (
         <div className="flex justify-center items-center min-h-screen bg-gray-100">
@@ -120,11 +145,11 @@ function Register({ onSwitch }) {
 
                     {/* CAPTCHA */}
                     <div className="mb-6 flex justify-center">
-    <ReCAPTCHA
-        sitekey="6LceNRwrAAAAAIjgmlUO-TF70hFgdODC_ey_cH3Q"
-        onChange={(token) => setCaptchaToken(token)}
-    />
-</div>
+                        <ReCAPTCHA
+                            sitekey="6LceNRwrAAAAAIjgmlUO-TF70hFgdODC_ey_cH3Q"
+                            onChange={(token) => setCaptchaToken(token)}
+                        />
+                    </div>
 
 
                     <button
@@ -133,6 +158,14 @@ function Register({ onSwitch }) {
                     >
                         Registrarse
                     </button>
+
+                    {errores.length > 0 && (
+                        <div className="bg-red-100 text-red-700 px-4 py-2 rounded mt-4 text-sm">
+                            {errores.map((err, i) => (
+                                <p key={i}>• {err.msg}</p>
+                            ))}
+                        </div>
+                    )}
 
                     {message && (
                         <p className="mt-4 text-center font-medium text-sm text-gray-700">{message}</p>
