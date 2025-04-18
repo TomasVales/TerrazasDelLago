@@ -4,12 +4,19 @@ const {
     getAllUsers,
     getCurrentUser,
     updateUserProfile
-} = require('../controllers/userController'); // 👈 Acá debe estar getAllUsers
+} = require('../controllers/userController');
+
+const upload = require('../config/multerConfig');
 
 const router = express.Router();
 
-router.get('/', verifyToken, isAdmin, getAllUsers); // 👈 Ruta para admin
+
+router.get('/', verifyToken, isAdmin, getAllUsers);
+
+
 router.get('/me', verifyToken, getCurrentUser);
-router.put('/me', verifyToken, updateUserProfile);
+
+
+router.put('/me', verifyToken, upload.single('image'), updateUserProfile);
 
 module.exports = router;

@@ -5,11 +5,15 @@ import { TbLocation, TbTruckDelivery } from 'react-icons/tb';
 import { FaSignOutAlt, FaWhatsapp } from "react-icons/fa";
 import { GoTrash } from "react-icons/go";
 import { useAuth } from '../context/AuthContext';
+import SearchBar from '../components/menu/SearchBar';
+
+
+
 
 const Menu = ({ cartItems, setCartItems, setMostrarTransferencia, logout }) => {
     const [nav, setNav] = useState(false);
     const [isCartOpen, setIsCartOpen] = useState(false);
-    const { user } = useAuth(); // ✅
+    const { user } = useAuth();
     const [paymentMethod, setPaymentMethod] = useState('');
     const [deliveryMethod, setDeliveryMethod] = useState('');
     const [address, setAddress] = useState('');
@@ -46,14 +50,8 @@ const Menu = ({ cartItems, setCartItems, setMostrarTransferencia, logout }) => {
             return;
         }
 
-        // Validaciones antes de enviar
         if (!paymentMethod || !deliveryMethod) {
             alert("Por favor seleccioná una forma de pago y un método de entrega.");
-            return;
-        }
-
-        if (paymentMethod === 'transferencia') {
-            setMostrarTransferencia(true);
             return;
         }
 
@@ -86,43 +84,57 @@ const Menu = ({ cartItems, setCartItems, setMostrarTransferencia, logout }) => {
             const data = await response.json();
             if (!response.ok) throw new Error(data.message);
 
-            alert("Orden creada con éxito 🎉");
+            // Después de guardar en backend, prepara el mensaje WhatsApp
+            const mensaje = `
+            PEDIDO: *TER-${data.id || Math.random().toString(36).substring(2, 7).toUpperCase()}* 
+            Estado del pago: Pendiente
+            ${cartItems.map(item => `— ${item.nombre} (x${item.cantidad}) > *$${(item.precio * item.cantidad).toLocaleString('es-AR')}*`).join('\n')}
+            *Total: $${total.toLocaleString('es-AR')}*
+            Forma de pago: *${paymentMethod.charAt(0).toUpperCase() + paymentMethod.slice(1)}*
+            Método de entrega: *${deliveryMethod === 'retiro' ? 'Retiro en el comercio' : 'Envío a domicilio'}*
+            Dirección de envío: *${direccionFinal}*
+            Aclaraciones del pedido: *Pedido generado desde la web*
+            `;
+
+            const urlWhatsapp = `https://wa.me/5491151393916?text=${encodeURIComponent(mensaje)}`;
+
+            window.open(urlWhatsapp, "_blank");  // abre WhatsApp
+
+            // Limpieza final del carrito
             setCartItems([]);
             setAddress('');
             setPaymentMethod('');
             setDeliveryMethod('');
             setIsCartOpen(false);
+
         } catch (error) {
             console.error("Error:", error);
             alert("No se pudo completar la orden.");
         }
     };
 
-
     return (
-        <div className='max-w-screen flex justify-between items-center p-4'>
+        <div className='max-w-screen flex justify-between items-center p-4 overflow-x-hidden'>
             {/* Lado izquierdo */}
             <div className='flex items-center'>
                 <div onClick={() => setNav(!nav)} className='cursor-pointer pt-1'>
                     <AiOutlineMenu color='[#208850]' size={30} />
                 </div>
-                <h1 className='xs:text-[0px] ss:text-2xl sm:text-3xl lg:text-4xl px-5'>
+                <h1 className='text-xl sm:text-2xl md:text-3xl px-2 sm:px-5'>
                     <span className='text-emerald-600 font-bold font-lato'>Terrazas del Lago</span>
                 </h1>
             </div>
 
             {/* Barra de búsqueda */}
-            <div className='bg-gray-300 rounded-full flex items-center px-2 sm:w-[400px] lg:w-[600px]'>
-                <AiOutlineSearch size={25} />
-                <input className='bg-transparent p-2 focus:outline-none w-full' type="text" placeholder='Buscar platos' />
-            </div>
+            <SearchBar setCartItems={setCartItems} cartItems={cartItems} />
 
             {/* Botón carrito */}
             <button
-                className='bg-emerald-700 rounded-full text-white hidden md:flex items-center pr-4 pl-4 py-2 hover:scale-105 duration-300 cursor-pointer'
+                className='bg-emerald-700 rounded-full text-white flex items-center px-3 py-2 hover:scale-105 duration-300 cursor-pointer'
                 onClick={() => setIsCartOpen(true)}
             >
-                <BsFillCartFill size={20} className='mr-2' /> Carrito
+                <BsFillCartFill size={20} className='lg:mr-2 justify-center' />
+                <span className='hidden md:inline'>Carrito</span>
             </button>
 
             {/* Carrito */}
@@ -134,9 +146,9 @@ const Menu = ({ cartItems, setCartItems, setMostrarTransferencia, logout }) => {
                     ></div>
 
                     <div className='
-                    md:w-[630px] sm:w-[600px] s:w-[540px] m:w-[470px] mi:w-[430px] si:w-[400px] ss:w-[360px] xs:w-[300px]
-                    fixed p-[15px] rounded-[10px] top-8 bottom-8 left-1/2 -translate-x-1/2 
-                    bg-white z-10 duration-300 overflow-y-auto custom-scroll'>
+                        md:w-[630px] w-[95vw]
+                        fixed p-4 rounded-lg top-4 bottom-4 left-1/2 -translate-x-1/2 
+                        bg-white z-10 duration-300 overflow-y-auto custom-scroll'>
                         <div className='flex justify-between items-center p-4 border-b border-gray-600 '>
                             <h2 className='text-2xl text-emerald-600 font-bold'>Carrito</h2>
                             <button
@@ -151,14 +163,14 @@ const Menu = ({ cartItems, setCartItems, setMostrarTransferencia, logout }) => {
                                 <p className="text-center text-gray-500 py-4">El carrito está vacío.</p>
                             ) : (
                                 cartItems.map((item) => (
-                                    <div key={item.id} className='flex items-center gap-4 max-w-[640px] border-b mx-3 py-2'>
+                                    <div key={item.id} className='flex items-center gap-4 w-full border-b mx-3 py-2'>
                                         <img className="w-[60px] h-[60px] object-cover rounded-sm" src={item.imagen} alt={item.nombre} />
-                                        <p className='font-medium'>{item.nombre}</p>
+                                        <p className='font-medium text-sm sm:text-base'>{item.nombre}</p>
 
                                         <div className='rounded-[10px] ml-auto mr-[20px] flex items-center gap-2'>
                                             <button
                                                 onClick={() => decrease(item.id)}
-                                                className='mi:w-[25px] xs:w-[15px] rounded-[10px] border border-gray-500 cursor-pointer hover:bg-[#208850] bg-black/14 hover:scale-95 duration-100'
+                                                className='w-[25px] rounded-[10px] border border-gray-500 cursor-pointer hover:bg-[#208850] bg-black/14 hover:scale-95 duration-100'
                                             >
                                                 <span className='font-semibold text-black'>-</span>
                                             </button>
@@ -172,26 +184,24 @@ const Menu = ({ cartItems, setCartItems, setMostrarTransferencia, logout }) => {
 
                                             <button
                                                 onClick={() => increase(item.id)}
-                                                className='mi:w-[25px] xs:w-[15px] bg-black/14 rounded-[10px] border border-gray-500 cursor-pointer hover:bg-[#208850] hover:scale-105 duration-100'
+                                                className='w-[25px] bg-black/14 rounded-[10px] border border-gray-500 cursor-pointer hover:bg-[#208850] hover:scale-105 duration-100'
                                             >
                                                 <span className='font-semibold text-black'>+</span>
                                             </button>
                                         </div>
 
-
-
                                         <button
                                             onClick={() => removeItem(item.id)}
                                             className='mr-[9px] cursor-pointer hover:scale-105 duration-300'
                                         >
-                                            <GoTrash className="mi:text-[20px] ss:text-[15px]" />
+                                            <GoTrash className="text-[20px]" />
                                         </button>
                                     </div>
                                 ))
                             )}
                         </div>
 
-                        {/* Resumen EPICAMENTE PIOLA */}
+                        {/* Resumen */}
                         <div className='bg-gray-300 my-[20px] p-[20px] rounded-2xl'>
                             <p className='font-semibold text-[22px] mb-4'>Resumen del Pedido</p>
 
@@ -212,10 +222,10 @@ const Menu = ({ cartItems, setCartItems, setMostrarTransferencia, logout }) => {
                             </div>
                         </div>
 
-                        {/* NUEVO: Opciones de pago y entrega */}
+                        {/* Opciones de pago y entrega */}
                         <div className="my-6 space-y-4 bg-gray-100 p-4 rounded-xl">
                             <h3 className="text-lg font-semibold text-gray-700">Forma de pago</h3>
-                            <div className="flex gap-4">
+                            <div className="flex flex-wrap gap-4">
                                 <label className="flex items-center gap-2">
                                     <input type="radio" name="payment" value="efectivo"
                                         checked={paymentMethod === 'efectivo'}
@@ -235,7 +245,7 @@ const Menu = ({ cartItems, setCartItems, setMostrarTransferencia, logout }) => {
                             </div>
 
                             <h3 className="text-lg font-semibold text-gray-700 mt-4">Método de entrega</h3>
-                            <div className="flex gap-4">
+                            <div className="flex flex-wrap gap-4">
                                 <label className="flex items-center gap-2">
                                     <input type="radio" name="delivery" value="retiro"
                                         checked={deliveryMethod === 'retiro'}
@@ -269,18 +279,17 @@ const Menu = ({ cartItems, setCartItems, setMostrarTransferencia, logout }) => {
                             )}
                         </div>
 
-
                         {/* Botones */}
-                        <div className='flex gap-6'>
+                        <div className='flex flex-col sm:flex-row gap-4'>
                             <button
                                 onClick={handleConfirmarOrden}
-                                className='py-2 px-5 cursor-pointer rounded-[10px] text-emerald-600 bg-white hover:bg-[#208850] hover:text-white border '
+                                className='py-2 px-5 cursor-pointer rounded-[10px] text-white bg-[#25D366] hover:bg-[#128C7E] flex-1 flex justify-center items-center gap-2'
                             >
-                                Completar Orden
+                                <FaWhatsapp size={20} /> Completar pedido en WhatsApp
                             </button>
                             <button
                                 onClick={() => setIsCartOpen(false)}
-                                className='py-2 px-5 cursor-pointer border text-gray-400 border-gray-400 rounded-[10px] hover:bg-gray-700/45 hover:text-white'>
+                                className='py-2 px-5 cursor-pointer border text-gray-400 border-gray-400 rounded-[10px] hover:bg-gray-700/45 hover:text-white flex-1'>
                                 Volver al menú
                             </button>
                         </div>
@@ -290,7 +299,10 @@ const Menu = ({ cartItems, setCartItems, setMostrarTransferencia, logout }) => {
 
             {/* Menú lateral */}
             {nav && <div className='bg-black/80 fixed w-full h-screen z-10 top-0 left-0'></div>}
-            <div className={nav ? 'fixed top-0 left-0 w-[300px] h-screen bg-white z-10 duration-300 font-montserrat' : 'fixed top-0 left-[-100%] w-[300px] h-screen bg-white z-10 duration-300 font-montserrat'}>
+            <div className={nav
+                ? 'fixed top-0 left-0 w-[300px] h-full bg-white z-10 duration-300 font-montserrat'
+                : 'fixed top-0 left-[-100%] w-[300px] h-full bg-white z-10 duration-300 font-montserrat'
+            }>
                 <AiOutlineClose onClick={() => setNav(!nav)} size={30} className='absolute right-4 top-4 cursor-pointer' />
                 <h2 className='text-2xl p-4'><span className='text-emerald-700 font-bold'>Terrazas Del Lago</span></h2>
                 <nav>
@@ -298,8 +310,8 @@ const Menu = ({ cartItems, setCartItems, setMostrarTransferencia, logout }) => {
                         <li
                             className='text-xl py-4 flex gap-1 cursor-pointer hover:text-emerald-600 transition-all'
                             onClick={() => {
-                                setNav(false);        // Cierra el sidebar
-                                setIsCartOpen(true);  // Abre el carrito
+                                setNav(false);
+                                setIsCartOpen(true);
                             }}
                         >
                             <AiOutlineShoppingCart size={23} className='mr-4' />
@@ -321,16 +333,16 @@ const Menu = ({ cartItems, setCartItems, setMostrarTransferencia, logout }) => {
                 </nav>
 
                 <div className='absolute bottom-4 left-0 right-0 px-4'>
-                <button
-                    onClick={() => {
-                        logout();
-                        setNav(false);
-                    }}
-                    className='w-full py-3 bg-red-600 hover:bg-red-700 text-white rounded-md flex items-center justify-center gap-2 transition-all cursor-pointer'
-                >
-                    <FaSignOutAlt size={20} />
-                    Cerrar Sesión
-                </button>
+                    <button
+                        onClick={() => {
+                            logout();
+                            setNav(false);
+                        }}
+                        className='w-full py-3 bg-red-600 hover:bg-red-700 text-white rounded-md flex items-center justify-center gap-2 transition-all cursor-pointer'
+                    >
+                        <FaSignOutAlt size={20} />
+                        Cerrar Sesión
+                    </button>
                 </div>
             </div>
         </div>

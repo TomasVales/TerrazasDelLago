@@ -4,13 +4,14 @@ import Auth from './pages/Auth';
 import './App.css';
 
 import Menu from './pages/Menu';
-import Cartel from './components/Cartel';
-import Cards from './components/Cards';
-import Comida from './components/Comida';
+import Cartel from './components/Menu/Cartel';
+import Cards from './components/Menu/Cards';
+import Comida from './components/Menu/Comida';
 import { ToastContainer } from 'react-toastify'
 import Transferencia from './pages/Transferencia'; // ✅ Importamos la vista
 
 import { useState } from 'react';
+import FooterMenu from './components/Menu/FooterMenu';
 
 function App() {
   const { user, loading, logout } = useAuth();
@@ -61,6 +62,7 @@ function App() {
         autoClose={2000}    
         />  
         <Comida addToCart={addToCart} />
+        <FooterMenu />
       </div>
     );
   }

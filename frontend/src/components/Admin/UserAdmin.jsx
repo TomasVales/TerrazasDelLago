@@ -5,7 +5,7 @@ import { useAuth } from '../../context/AuthContext';
 
 const BACKEND_URL = 'http://localhost:3000';
 
-const UserAdmin = () => {
+const UserAdmin = ({ searchQuery }) => {
     const { user } = useAuth();
     const [users, setUsers] = useState([]);
     const [error, setError] = useState(null);
@@ -27,16 +27,31 @@ const UserAdmin = () => {
         fetchUsers();
     }, []);
 
+    const filteredUsers = users.filter((u) => {
+        const q = searchQuery.toLowerCase();
+        return (
+            u.name.toLowerCase().includes(q) ||
+            u.email.toLowerCase().includes(q) ||
+            u.role.toLowerCase().includes(q) ||
+            new Date(u.createdAt).toLocaleDateString('es-AR').includes(q) ||
+            u.id.toString().includes(q)
+        );
+    });
+
     return (
-        <div className="p-6">
+        <div className="h-full 
+        xs:p-1
+        lg:p-6">
             <div className="rounded-lg border border-gray-400 shadow-sm bg-white">
                 <div className="flex flex-col space-y-1.5 p-6">
-                    <h3 className="text-2xl pb-1 font-semibold">Usuarios</h3>
-                    <p className="text-sm text-gray-500">Lista de usuarios registrados.</p>
+                    <h3 className="xs:text-[22px] lg:text-2xl pb-1 font-semibold">Usuarios</h3>
+                    <p className="xs:text-[13px]  lg:text-sm text-gray-500">Lista de usuarios registrados.</p>
                 </div>
-                <div className="p-6 pt-0">
+                <div className="
+                xs:p-3
+                lg:p-6 pt-0 relative w-full overflow-x-auto">
                     <table className="w-full table-auto text-sm">
-                        <thead className="border-b bg-gray-100">
+                        <thead className="border-b border-gray-200 hover:bg-gray-100">
                             <tr>
                                 <th className="p-4 text-left text-gray-500">ID</th>
                                 <th className="p-4 text-left text-gray-500">Nombre</th>
@@ -46,8 +61,8 @@ const UserAdmin = () => {
                             </tr>
                         </thead>
                         <tbody>
-                            {users.map((u) => (
-                                <tr key={u.id} className="border-b hover:bg-gray-50">
+                            {filteredUsers.map((u) => (
+                                <tr key={u.id} className="border-b border-gray-200 hover:bg-gray-50">
                                     <td className="p-4">{u.id}</td>
                                     <td className="p-4 capitalize">{u.name}</td>
                                     <td className="p-4">{u.email}</td>

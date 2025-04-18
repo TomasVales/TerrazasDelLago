@@ -1,16 +1,26 @@
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
+const axios = require('axios');
 const { OAuth2Client } = require('google-auth-library');
 const User = require('../models/user');
 
 const client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
 
+// Registro con validación de reCAPTCHA
 const register = async (req, res) => {
     try {
-        const { name, email, password } = req.body;
+        const { name, email, password, captchaToken } = req.body;
 
-        if (!name || !email || !password)
+        if (!name || !email || !password || !captchaToken)
             return res.status(400).json({ message: 'Faltan datos' });
+
+        // Validar reCAPTCHA
+        const verifyUrl = `https://www.google.com/recaptcha/api/siteverify?secret=${process.env.RECAPTCHA_SECRET}&response=${captchaToken}`;
+        const response = await axios.post(verifyUrl);
+
+        if (!response.data.success) {
+            return res.status(400).json({ message: 'Captcha inválido. Por favor, verificalo.' });
+        }
 
         const existing = await User.findOne({ where: { email } });
         if (existing)
@@ -24,14 +34,26 @@ const register = async (req, res) => {
             user: { id: user.id, name: user.name }
         });
     } catch (err) {
-        console.error('Error al registrar:', err);
-        res.status(500).json({ message: 'Error en el registro' });
+        console.error('❌ Error al registrar:', err);
+        res.status(500).json({ message: 'Error en el registro', error: err.message });
     }
 };
 
+// Login clásico con validación de reCAPTCHA
 const login = async (req, res) => {
     try {
-        const { email, password } = req.body;
+        const { email, password, captchaToken } = req.body;
+
+        if (!captchaToken) return res.status(400).json({ message: 'Captcha requerido' });
+
+        // Validar reCAPTCHA
+        const verifyUrl = `https://www.google.com/recaptcha/api/siteverify?secret=${process.env.RECAPTCHA_SECRET}&response=${captchaToken}`;
+        const response = await axios.post(verifyUrl);
+
+        if (!response.data.success) {
+            return res.status(400).json({ message: 'Captcha inválido.' });
+        }
+
         const user = await User.findOne({ where: { email } });
 
         if (!user || !(await bcrypt.compare(password, user.password))) {
@@ -59,6 +81,7 @@ const login = async (req, res) => {
     }
 };
 
+// Login con Google
 const googleLogin = async (req, res) => {
     const { credential } = req.body;
 
@@ -77,7 +100,7 @@ const googleLogin = async (req, res) => {
             user = await User.create({
                 name,
                 email,
-                password: 'google_auth', // dummy
+                password: 'google_auth',
                 role: 'user'
             });
         }

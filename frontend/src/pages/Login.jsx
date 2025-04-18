@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import ReCAPTCHA from 'react-google-recaptcha';
 import { useAuth } from '../context/AuthContext';
 import Image from '../../src/assets/nuevoquilmes.webp';
 import Logo from '../../src/assets/logo3.webp';
@@ -9,6 +10,8 @@ function Login({ onSwitch }) {
     const [password, setPassword] = useState('');
     const [message, setMessage] = useState('');
     const [rememberMe, setRememberMe] = useState(false);
+    const [captchaVisible, setCaptchaVisible] = useState(false);
+    const [captchaToken, setCaptchaToken] = useState(null);
 
     useEffect(() => {
         if (!window.google) return;
@@ -30,11 +33,18 @@ function Login({ onSwitch }) {
 
     const handleSubmit = async (e) => {
         e.preventDefault();
+
+        if (!captchaToken) {
+            setCaptchaVisible(true);
+            setMessage('Por favor completá el captcha.');
+            return;
+        }
+
         try {
             const res = await fetch('http://localhost:3000/api/auth/login', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ email, password }),
+                body: JSON.stringify({ email, password, captchaToken }),
             });
 
             const data = await res.json();
@@ -47,6 +57,9 @@ function Login({ onSwitch }) {
                 role: data.user.role,
                 email: data.user.email,
             });
+
+            setCaptchaToken(null);
+            setCaptchaVisible(false);
 
             if (rememberMe) {
                 localStorage.setItem('rememberedEmail', email);
@@ -138,6 +151,15 @@ function Login({ onSwitch }) {
                         />
                         <label htmlFor="remember" className="text-gray-600 ml-2">Recordarme</label>
                     </div>
+
+                    {captchaVisible && (
+                        <div className="mb-4 flex justify-center">
+                            <ReCAPTCHA
+                                sitekey="6LceNRwrAAAAAIjgmlUO-TF70hFgdODC_ey_cH3Q"
+                                onChange={(token) => setCaptchaToken(token)}
+                            />
+                        </div>
+                    )}
 
                     <div className="mb-6 text-emerald-600">
                         <a href="#" className="hover:underline">Olvidaste la contraseña?</a>

@@ -77,8 +77,8 @@ const ProductForm = ({ onAddProduct, onCancel }) => {
     };
 
     return (
-        <div className="absolute inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4 z-[999]">
-            <div className="bg-white rounded-xl shadow-2xl w-full max-w-2xl overflow-hidden animate-fade-in">
+        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-[999]">
+            <div className="bg-white rounded-xl shadow-2xl w-full max-w-2xl overflow-hidden animate-fade-in ">
                 <div className="border-b border-gray-100 p-6 flex justify-between items-center">
                     <h2 className="text-2xl font-semibold text-gray-900">Agregar Nuevo Producto</h2>
                     <button

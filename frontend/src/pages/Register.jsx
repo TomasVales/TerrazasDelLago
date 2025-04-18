@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import ReCAPTCHA from 'react-google-recaptcha';
 import Logo from '../assets/logo3.webp';
 import Image from '../assets/imagen.webp';
 
@@ -10,6 +11,7 @@ function Register({ onSwitch }) {
         confirmPassword: '',
     });
 
+    const [captchaToken, setCaptchaToken] = useState(null);
     const [message, setMessage] = useState('');
 
     const handleSubmit = async (e) => {
@@ -17,6 +19,11 @@ function Register({ onSwitch }) {
 
         if (form.password !== form.confirmPassword) {
             setMessage('❌ Las contraseñas no coinciden');
+            return;
+        }
+
+        if (!captchaToken) {
+            setMessage('❌ Por favor verifica que no sos un robot.');
             return;
         }
 
@@ -28,6 +35,7 @@ function Register({ onSwitch }) {
                     name: form.name,
                     email: form.email,
                     password: form.password,
+                    captchaToken: captchaToken, // 👈 mandamos el token al backend
                 }),
             });
 
@@ -37,6 +45,7 @@ function Register({ onSwitch }) {
 
             setMessage('✅ Usuario creado. Ahora podés iniciar sesión.');
             setForm({ name: '', email: '', password: '', confirmPassword: '' });
+            setCaptchaToken(null);
         } catch (err) {
             setMessage('❌ ' + err.message);
         }
@@ -44,14 +53,11 @@ function Register({ onSwitch }) {
 
     return (
         <div className="flex justify-center items-center min-h-screen bg-gray-100">
-
-            {/* Formulario */}
             <div className="p-6 sm:p-2 md:p-4 lg:p-10 xl:p-12 w-full sm:w-1/2 max-h-[90vh] overflow-y-auto">
                 <img src={Logo} alt="Logo" className='w-36 h-auto rounded-[50%] mx-auto pb-1 shadow-2xl' />
                 <h1 className="text-5xl pt-5 text-center font-semibold mb-5">Regístrate</h1>
 
                 <form onSubmit={handleSubmit}>
-
                     <div className="mb-4">
                         <label htmlFor="name" className="block text-gray-600">Nombre completo</label>
                         <input
@@ -112,6 +118,15 @@ function Register({ onSwitch }) {
                         </label>
                     </div>
 
+                    {/* CAPTCHA */}
+                    <div className="mb-6 flex justify-center">
+    <ReCAPTCHA
+        sitekey="6LceNRwrAAAAAIjgmlUO-TF70hFgdODC_ey_cH3Q"
+        onChange={(token) => setCaptchaToken(token)}
+    />
+</div>
+
+
                     <button
                         type="submit"
                         className="bg-emerald-600 hover:bg-emerald-800 cursor-pointer text-white font-semibold rounded-md py-2 px-4 w-full"
@@ -135,7 +150,6 @@ function Register({ onSwitch }) {
                 </div>
             </div>
 
-            {/* Imagen derecha */}
             <div className="w-1/2 h-screen hidden lg:block">
                 <img src={Image} alt="Image" className="object-cover w-full h-full" />
             </div>

@@ -31,10 +31,11 @@ export default function Sidebar({ children, setActiveItem }) {
     };
 
     return (
-        <aside className='h-screen'>
+        <aside className={`h-screen transition-all duration-300 
+            ${expanded ? 'w-64' : 'w-17'} md:block`}>
             <nav className='h-full flex flex-col bg-white border-r border-gray-400 shadow-2xl'>
                 <div className='p-4 pb-2 flex justify-between items-center'>
-                    <p className={`overflow-hidden transition-all 
+                    <p className={`overflow-hidden transition-all duration-300
                         ${expanded ? "text-[21px] text-[#208850] font-semibold font-sans" : "text-[0px]"}`}>
                         Terrazas del Lago
                     </p>
@@ -49,14 +50,21 @@ export default function Sidebar({ children, setActiveItem }) {
                 </SidebarContext.Provider>
 
                 <div onClick={handleProfileClick} className='border-t border-gray-400 flex p-3 cursor-pointer hover:bg-gray-100'>
-                    <img src={profile} alt='Perfil' className='w-10 h-10 rounded-md object-cover' />
-                    <div className={`flex justify-between items-center overflow-hidden transition-all
-                        ${expanded ? " w-52 ml-3" : "w-0"}`}>
+                    <img
+                        src={
+                            profileData.image
+                                ? `${BACKEND_URL}${profileData.image}`
+                                : profile
+                        }
+                        alt="Perfil"
+                        className="w-10 h-10 rounded-md object-cover"
+                    />
+                    <div className={`flex justify-between items-center overflow-hidden transition-all 
+                        ${expanded ? "w-52 ml-3" : "w-0"}`}>
                         <div className='leading-4'>
-                            <h4 className='font-semibold truncate'>{profileData.name || 'Usuario'}</h4>
+                            <h4 className='font-semibold truncate pb-1'>{profileData.name || 'Usuario'}</h4>
                             <span className='text-xs text-gray-600 truncate'>{profileData.email || ''}</span>
                         </div>
-                        <EllipsisVertical size={20} />
                     </div>
                 </div>
             </nav>
@@ -64,7 +72,7 @@ export default function Sidebar({ children, setActiveItem }) {
     );
 }
 
-export function SidebarItem({ icon, text, active, alert, onClick }) {
+export function SidebarItem({ icon, text, active, onClick }) {
     const { expanded } = useContext(SidebarContext);
     return (
         <li
@@ -74,13 +82,32 @@ export function SidebarItem({ icon, text, active, alert, onClick }) {
             ${active ? "bg-gradient-to-tr from-[#208850]/20 to-[#208850]/20 text-[#208850]" : "hover:bg-[#208850]/50 text-gray-600"}`}>
             {icon}
             <span className={`overflow-hidden transition-all ${expanded ? "w-52 ml-3" : "w-0"}`}>{text}</span>
-            {alert && (
-                <div className={`absolute right-2 w-2 h-2 rounded bg-[#208850] ${expanded ? "" : "top-2"}`} />
-            )}
             {!expanded && (
-                <div className={`absolute left-full rounded-md px-2 py-1 ml-6 
-                    bg-[#208850]/10 text-[#208850] text-sm invisible opacity-20
+                <div className={`z-99 absolute left-full rounded-md px-2 py-1 ml-6 
+                    bg-white/90 text-[#208850] text-sm invisible opacity-20
                     -translate-x-3 transition-all group-hover:translate-x-0
+                    group-hover:opacity-100 group-hover:visible`}>
+                    {text}
+                </div>
+            )}
+        </li>
+    );
+}
+
+export function SidebarItemLogout({ icon, text, active, onClick }) {
+    const { expanded } = useContext(SidebarContext);
+    return (
+        <li
+            onClick={onClick}
+            className={`relative flex items-center py-2 px-3 my-1 font-medium rounded-md cursor-pointer	
+            transition-colors group 
+            ${active ? "" : "hover:bg-[#c51111]/30 text-[#fd1313]"}`}>
+            {icon}
+            <span className={`overflow-hidden transition-all duration-300  ${expanded ? "w-52 ml-3" : "w-0"}`}>{text}</span>
+            {!expanded && (
+                <div className={`absolute left-full rounded-md z-99  px-4 items-center py-1 ml-6 
+                    bg-white/90 text-[#fd1313] text-sm  invisible opacity-20
+                    -translate-x-3 transition-all duration-300  group-hover:translate-x-0
                     group-hover:opacity-100 group-hover:visible`}>
                     {text}
                 </div>

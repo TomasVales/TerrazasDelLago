@@ -9,7 +9,7 @@ import EditProduct from './EditProduct';
 const BACKEND_URL = 'http://localhost:3000';
 const MySwal = withReactContent(Swal);
 
-const ProdAdmin = () => {
+const ProdAdmin = ({ searchQuery }) => {
     const { user } = useAuth();
     const [ActivateP, setActivateP] = useState('');
     const [showMenu, setShowMenu] = useState(null);
@@ -18,6 +18,7 @@ const ProdAdmin = () => {
     const [showAddForm, setShowAddForm] = useState(false);
     const [editingProduct, setEditingProduct] = useState(null);
     const fileInputRef = useRef(null);
+
 
     useEffect(() => {
         fetchProducts();
@@ -113,14 +114,30 @@ const ProdAdmin = () => {
         return type;
     };
 
-    const filteredProducts = ActivateP
-        ? products.filter((product) => getMainCategory(product.type) === ActivateP)
-        : products;
+    const filteredProducts = products.filter((product) => {
+        const q = searchQuery.toLowerCase();
+        const matchesSearch =
+            product.name.toLowerCase().includes(q) ||
+            product.type.toLowerCase().includes(q) ||
+            product.price.toString().includes(q) ||
+            new Date(product.createdAt).toLocaleDateString('es-AR').includes(q);
+
+        const matchesCategory = ActivateP
+            ? getMainCategory(product.type) === ActivateP
+            : true;
+
+        return matchesSearch && matchesCategory;
+    });
 
     return (
         <>
-            <div className='bg-gray-50 p-4 sm:px-6 md:gap-4'>
-                <div className='flex items-center'>
+            <div className='bg-gray-50 p-4 xs:px-0.5'>
+                {/*Filtro y añadir producto*/}
+                <div className='
+                lg:px-4 pb-2 lg:flex-row
+                lg:justify-between lg:items-center lg:gap-0
+                xs:flex-col xs:gap-3 xs:items-start
+                flex'>
                     <div className='inline-flex h-10 rounded-md p-1 bg-gray-100'>
                         {['', 'Comidas', 'Bebidas', 'Postres'].map((tipo) => (
                             <button
@@ -133,7 +150,9 @@ const ProdAdmin = () => {
                             </button>
                         ))}
                     </div>
-                    <div className='ml-auto flex flex-inline items-center'>
+                    <div className='
+                    xs:ml-0 lg:ml-90
+                    ml-auto flex flex-inline items-center'>
                         <button
                             onClick={() => setShowAddForm(true)}
                             className='cursor-pointer hover:bg-[#208850]/80 flex gap-1 items-center bg-[#208850] px-3 h-8 rounded text-sm font-medium text-white'>
@@ -142,52 +161,76 @@ const ProdAdmin = () => {
                         </button>
                     </div>
                 </div>
-
+                {/*Lista*/}
                 <div className='mt-3'>
                     <div className='rounded-lg border border-gray-400 shadow-sm bg-white'>
-                        <div className='flex flex-col space-y-1.5 p-6'>
-                            <h3 className='text-2xl pb-1 font-semibold leading-none tracking-tight'>Productos</h3>
-                            <p className='text-sm text-gray-500'>Maneja y ve las estadísticas de tus productos.</p>
+                        <div className='
+                        xs:p-5
+                        flex flex-col space-y-1.5 lg:p-6'>
+                            <h3 className='
+                            xs:text-[22px]
+                            lg:text-2xl pb-1 font-semibold leading-none tracking-tight'>Productos</h3>
+                            <p className='
+                            xs:text-[13px]
+                            lg:text-sm text-gray-500'>Maneja y ve las estadísticas de tus productos.</p>
                         </div>
                         <div className='p-6 pt-0'>
-                            <div className='relative w-full overflow-auto'>
-                                <table className='w-full caption-bottom text-sm'>
-                                    <thead className='border-b'>
-                                        <tr className='border-b border-gray-200 transition-colors hover:bg-gray-50 bg-white'>
-                                            <th className='h-12 px-4 text-left align-middle font-medium text-gray-500 w-[100px] sm:table-cell'>
+                            <div className='relative w-full overflow-x-auto'>
+                                <table className='
+                                
+                                w-full  text-sm'>
+                                    <thead className='
+                                    
+                                    border-b'>
+                                        <tr className='
+
+                                        border-b border-gray-200 transition-colors hover:bg-gray-50 bg-white'>
+                                            <th className='
+                                            
+                                            h-15 px-4 text-left align-middle font-medium text-gray-500 w-[100px] '>
                                                 <span className='sr-only'>imagen</span>
                                             </th>
-                                            <th className='h-12 px-4 text-left align-middle font-medium text-gray-500'>Nombre</th>
-                                            <th className='h-12 px-4 text-left align-middle font-medium text-gray-500'>Stock</th>
-                                            <th className='h-12 px-4 text-left align-middle font-medium text-gray-500 hidden md:table-cell'>Precio</th>
-                                            <th className='h-12 px-4 text-left align-middle font-medium text-gray-500 hidden md:table-cell'>Ventas Totales</th>
-                                            <th className='h-12 px-4 text-left align-middle font-medium text-gray-500 hidden md:table-cell'>Creación</th>
-                                            <th className='h-12 px-4 text-left align-middle font-medium text-gray-500'>
+                                            <th className='
+                                            
+                                            h-15 px-4 text-left align-middle font-medium text-gray-500'>Nombre</th>
+                                            <th className='
+                                            
+                                            h-15 px-4 text-left align-middle font-medium text-gray-500'>Stock</th>
+                                            <th className='
+                                            
+                                            h-15 px-4 text-left align-middle font-medium text-gray-500 '>Precio</th>
+                                            <th className='
+                                            
+                                            h-15 px-4 text-left align-middle font-medium text-gray-500 '>Ventas Totales</th>
+                                            <th className='
+                                            
+                                            h-15 px-4 text-left align-middle font-medium text-gray-500 '>Creación</th>
+                                            <th className='
+                                            
+                                            h-15 px-4 text-left align-middle font-medium text-gray-500'>
                                                 <span className='sr-only'>Acciones</span>
                                             </th>
                                         </tr>
                                     </thead>
                                     <tbody>
                                         {filteredProducts.map((product, index) => (
-                                            <tr key={product.id} className='border-b border-gray-200 hover:bg-gray-50 bg-white'>
-                                                <td className='p-4 align-middle hidden sm:table-cell'>
+                                            <tr key={product.id} className='border-b border-gray-100 hover:bg-gray-50 bg-white'>
+                                                <td className='p-4 align-middle hidden xs:table-cell'>
                                                     <img
                                                         src={`${BACKEND_URL}${product.image}?ts=${Date.now()}`}
                                                         alt={product.name}
-                                                        width='70'
-                                                        height='64'
-                                                        className='aspect-square rounded-md object-cover'
+                                                        className='w-[70px] h-[64px] min-w-[70px] min-h-[64px] rounded-md object-cover'
                                                     />
                                                 </td>
-                                                <td className='p-4 align-middle font-medium'>{product.name}</td>
+                                                <td className='xs:px-2 align-middle font-medium'>{product.name}</td>
                                                 <td className='p-4 align-middle'>
                                                     <div className='inline-flex items-center rounded-full border px-2.5 py-0.5 border-gray-200 text-xs font-semibold capitalize'>
                                                         disponible
                                                     </div>
                                                 </td>
-                                                <td className='p-4 align-middle hidden md:table-cell'>${parseFloat(product.price).toFixed(2)}</td>
-                                                <td className='p-4 align-middle hidden md:table-cell'>-</td>
-                                                <td className='p-4 align-middle hidden md:table-cell'>
+                                                <td className='p-4 align-middle'>${parseFloat(product.price).toFixed(2)}</td>
+                                                <td className='p-4 align-middle'>-</td>
+                                                <td className='p-4 align-middle'>
                                                     {new Date(product.createdAt).toLocaleDateString('es-AR')}
                                                 </td>
                                                 <td className='p-4 align-middle relative'>
@@ -198,7 +241,7 @@ const ProdAdmin = () => {
                                                         <Ellipsis size={20} />
                                                     </button>
                                                     {showMenu === index && (
-                                                        <div className='fixed p-1 right-30 transition duration-300 mt-2 w-32 bg-white border border-gray-200 rounded-md shadow-lg z-1000'>
+                                                        <div className='absolute p-1 right-19 bottom-9 transition duration-300 w-32 bg-white border border-gray-200 rounded-md shadow-lg z-9999'>
                                                             <div className='px-4 py-2 text-sm font-semibold text-gray-500'>Acciones</div>
                                                             <button
                                                                 onClick={() => {

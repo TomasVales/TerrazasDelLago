@@ -7,7 +7,7 @@ import withReactContent from 'sweetalert2-react-content';
 const BACKEND_URL = 'http://localhost:3000';
 const MySwal = withReactContent(Swal);
 
-const OrderAdmin = () => {
+const OrderAdmin = ({ searchQuery }) => {
     const { user } = useAuth();
     const [orders, setOrders] = useState([]);
     const [showMenu, setShowMenu] = useState(null);
@@ -27,6 +27,21 @@ const OrderAdmin = () => {
             console.error(error);
         }
     };
+
+    const filteredOrders = orders.filter((order) => {
+        const q = searchQuery.toLowerCase();
+        return (
+            order.id.toString().includes(q) ||
+            order.status.toLowerCase().includes(q) ||
+            (order.address?.toLowerCase() || '').includes(q) ||
+            (order.User?.name?.toLowerCase() || '').includes(q) ||
+            order.total.toString().includes(q) ||
+            new Date(order.createdAt).toLocaleDateString('es-AR').includes(q) ||
+            order.OrderItems?.some(item =>
+                item.Product?.name?.toLowerCase().includes(q)
+            )
+        );
+    });
 
     const handleDelete = async (id) => {
         try {
@@ -78,13 +93,14 @@ const OrderAdmin = () => {
         <div className="p-6">
             <div className="rounded-lg border border-gray-400 shadow-sm bg-white">
                 <div className="flex flex-col space-y-1.5 p-6">
-                    <h3 className="text-2xl pb-1 font-semibold">Pedidos</h3>
-                    <p className="text-sm text-gray-500">Lista de pedidos del sistema.</p>
+                    <h3 className="lg:text-2xl xs:text-xl
+                     pb-1 font-semibold">Pedidos</h3>
+                    <p className="lg:text-sm  xs:text-[14px] text-gray-500">Lista de pedidos del sistema.</p>
                 </div>
                 <div className="p-6 pt-0">
                     <div className="relative w-full overflow-auto">
                         <table className="w-full table-auto text-sm">
-                            <thead className="border-b">
+                            <thead className="border-b ">
                                 <tr className="border-b border-gray-200 bg-gray-100">
                                     <th className="p-4 text-left text-gray-500">ID</th>
                                     <th className="p-4 text-left text-gray-500">Cliente</th>
@@ -97,16 +113,16 @@ const OrderAdmin = () => {
                                 </tr>
                             </thead>
                             <tbody>
-                                {orders.map((order) => (
-                                    <tr key={order.id} className="border-b hover:bg-gray-50">
+                                {filteredOrders.map((order) => (
+                                    <tr key={order.id} className="border-b border-gray-200 hover:bg-gray-50">
                                         <td className="p-4">{order.id}</td>
                                         <td className="p-4">{order.User?.name || 'Anónimo'}</td>
                                         <td className="p-4 text-blue-600 font-semibold">${order.total}</td>
                                         <td className={`p-4 capitalize ${order.status === 'completed'
-                                                ? 'text-green-500'
-                                                : order.status === 'cancelled'
-                                                    ? 'text-red-500'
-                                                    : 'text-yellow-500'
+                                            ? 'text-green-500'
+                                            : order.status === 'cancelled'
+                                                ? 'text-red-500'
+                                                : 'text-yellow-500'
                                             }`}>
                                             {order.status}
                                         </td>
@@ -122,7 +138,10 @@ const OrderAdmin = () => {
                                                 <Ellipsis size={20} />
                                             </button>
                                             {showMenu === order.id && (
-                                                <div className="absolute right-0 mt-2 w-36 bg-white border border-gray-200 rounded-md shadow-lg z-50">
+                                                <div className="
+                                                lg:right-35 lg:bottom-7
+                                                xs:right-19 xs:bottom-10
+                                                absolute  mt-2 w-36 bg-white border border-gray-200 rounded-md shadow-lg z-50">
                                                     <button
                                                         className="w-full text-left px-4 py-2 hover:bg-gray-100 text-sm"
                                                         onClick={() => handleChangeStatus(order)}

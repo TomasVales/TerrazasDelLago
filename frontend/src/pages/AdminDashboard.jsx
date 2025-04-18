@@ -1,18 +1,22 @@
 import { useEffect, useState, useRef } from 'react';
 import { useAuth } from '../context/AuthContext';
-import SidebarAdmin, { SidebarItem } from '../components/Admin/SiderbarAdmin';
+import SidebarAdmin, { SidebarItem, SidebarItemLogout } from '../components/Admin/SiderbarAdmin';
 import LayoutAdmin from '../components/Admin/LayoutAdmin';
 import ProdAdmin from '../components/Admin/ProdAdmin';
 import OrderAdmin from '../components/Admin/OrderAdmin';
 import UserAdmin from '../components/Admin/UserAdmin';
 import HeaderAdmin from '../components/Admin/HeaderAdmin';
 import UserProfile from '../components/Admin/UserProfile';
-import { ShoppingCart, LayoutDashboard, Package, Users } from "lucide-react";
+import { FaSignOutAlt } from "react-icons/fa";
+
+
+import { ShoppingCart, LayoutDashboard, Package, Users, User } from "lucide-react";
 
 function AdminDashboard() {
     const { user, logout } = useAuth();
     const [orders, setOrders] = useState([]);
     const [products, setProducts] = useState([]);
+    const [searchQuery, setSearchQuery] = useState('');
     const [activeItem, setActiveItem] = useState('Home');
     const [newProduct, setNewProduct] = useState({
         name: '',
@@ -147,34 +151,48 @@ function AdminDashboard() {
         });
     };
 
+
+    const LogoutButton = () => (
+        <button
+            onClick={logout}
+            className=''
+        >
+            Logout
+        </button>
+    );
+
     return (
-        <div className='min-h-screen xs:flex'>
-            <div>
-                <SidebarAdmin setActiveItem={setActiveItem}>
-                    <SidebarItem icon={<LayoutDashboard size={20} />} text="Home"
-                        active={activeItem === 'Home'}
-                        onClick={() => setActiveItem('Home')} />
-                    <SidebarItem icon={<Package size={20} />} text="Productos"
-                        active={activeItem === 'Productos'}
-                        onClick={() => setActiveItem('Productos')} />
-                    <SidebarItem icon={<ShoppingCart size={20} />} text="Pedidos"
-                        active={activeItem === 'Pedidos'}
-                        onClick={() => setActiveItem('Pedidos')} />
-                    <SidebarItem icon={<Users size={20} />} text="Usuarios"
-                        active={activeItem === 'Usuarios'}
-                        onClick={() => setActiveItem('Usuarios')} />
-                    <SidebarItem icon={<Users size={20} />} text="Perfil"
-                        active={activeItem === 'Perfil'}
-                        onClick={() => setActiveItem('Perfil')} />
-                </SidebarAdmin>
-            </div>
-            <div className='flex-1 transition-all duration-300 ease-in-out'>
-                <HeaderAdmin />
-                {activeItem === 'Home' && <LayoutAdmin />}
-                {activeItem === 'Productos' && <ProdAdmin />}
-                {activeItem === 'Pedidos' && <OrderAdmin />}
-                {activeItem === 'Usuarios' && <UserAdmin />}
-                {activeItem === 'Perfil' && <UserProfile />}
+        <div className='flex h-screen overflow-hidden'>
+            <SidebarAdmin setActiveItem={setActiveItem}>
+                <SidebarItem icon={<LayoutDashboard size={20} />} text="Home"
+                    active={activeItem === 'Home'}
+                    onClick={() => setActiveItem('Home')} />
+                <SidebarItem icon={<Package size={20} />} text="Productos"
+                    active={activeItem === 'Productos'}
+                    onClick={() => setActiveItem('Productos')} />
+                <SidebarItem icon={<ShoppingCart size={20} />} text="Pedidos"
+                    active={activeItem === 'Pedidos'}
+                    onClick={() => setActiveItem('Pedidos')} />
+                <SidebarItem icon={<Users size={20} />} text="Usuarios"
+                    active={activeItem === 'Usuarios'}
+                    onClick={() => setActiveItem('Usuarios')} />
+                <SidebarItem icon={<User size={20} />} text="Perfil"
+                    active={activeItem === 'Perfil'}
+                    onClick={() => setActiveItem('Perfil')} />
+                <hr className='my-2 border-gray-400' />
+                <SidebarItemLogout icon={<FaSignOutAlt size={20} className='text-red-500' />} text="Desloguear"
+                    onClick={() => logout()} />
+            </SidebarAdmin>
+            <div className='flex flex-col flex-1 overflow-auto '>
+                <HeaderAdmin searchQuery={searchQuery} setSearchQuery={setSearchQuery} />
+                <div className='flex-1 bg-gray-50 p-4 sy:px-2'>
+                    {activeItem === 'Home' && <LayoutAdmin />}
+                    {activeItem === 'Productos' && <ProdAdmin searchQuery={searchQuery} />}
+                    {activeItem === 'Pedidos' && <OrderAdmin searchQuery={searchQuery} />}
+                    {activeItem === 'Usuarios' && <UserAdmin searchQuery={searchQuery} />}
+
+                    {activeItem === 'Perfil' && <UserProfile />}
+                </div>
             </div>
         </div>
     );
