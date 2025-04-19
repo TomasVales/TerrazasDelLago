@@ -20,7 +20,7 @@ function Register({ onSwitch }) {
     const handleSubmit = async (e) => {
         e.preventDefault();
         setMessage('');
-        setErrores([]); // ✅ si usás un array de errores múltiples
+        setErrores([]); 
 
 
         if (!nameRegex.test(form.name)) {

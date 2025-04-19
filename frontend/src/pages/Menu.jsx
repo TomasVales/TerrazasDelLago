@@ -125,19 +125,19 @@ const Menu = ({ cartItems, setCartItems, setMostrarTransferencia, logout }) => {
         }
     };
     return (
-        <div className='max-w-screen flex justify-between items-center p-4 overflow-x-hidden'>
+        <div className='max-w-screen flex justify-between items-center p-4 font-montserrat'>
             {/* Lado izquierdo */}
             <div className='flex items-center'>
-                <div onClick={() => setNav(!nav)} className='cursor-pointer pt-1'>
+                <div onClick={() => setNav(!nav)} className='cursor-pointer'>
                     <AiOutlineMenu color='[#208850]' size={30} />
                 </div>
-                <h1 className='text-xl sm:text-2xl md:text-3xl px-2 sm:px-5'>
-                    <span className='text-emerald-600 font-bold font-lato'>Terrazas del Lago</span>
+                <h1 className='text-1xl md:text-2xl px-2 sm:px-5'>
+                    <span className='text-emerald-700 font-bold font-lato'>Terrazas del Lago</span>
                 </h1>
             </div>
 
             {/* Barra de búsqueda */}
-            <SearchBar setCartItems={setCartItems} cartItems={cartItems} />
+            <SearchBar setCartItems={setCartItems} cartItems={cartItems} isCartOpen={isCartOpen} nav={nav} />
 
             {/* Botón carrito */}
             <button
@@ -160,8 +160,8 @@ const Menu = ({ cartItems, setCartItems, setMostrarTransferencia, logout }) => {
                         md:w-[630px] w-[95vw]
                         fixed p-4 rounded-lg top-4 bottom-4 left-1/2 -translate-x-1/2 
                         bg-white z-10 duration-300 overflow-y-auto custom-scroll'>
-                        <div className='flex justify-between items-center p-4 border-b border-gray-600 '>
-                            <h2 className='text-2xl text-emerald-600 font-bold'>Carrito</h2>
+                        <div className='flex justify-between items-center p-4 border-b border-gray-600'>
+                            <h2 className='text-2xl text-emerald-700 font-bold'>Carrito</h2>
                             <button
                                 className='text-gray-500 hover:text-black text-xl cursor-pointer'
                                 onClick={() => setIsCartOpen(false)}><AiOutlineClose />
@@ -294,7 +294,7 @@ const Menu = ({ cartItems, setCartItems, setMostrarTransferencia, logout }) => {
                         <div className='flex flex-col sm:flex-row gap-4'>
                             <button
                                 onClick={handleConfirmarOrden}
-                                className='py-2 px-5 cursor-pointer rounded-[10px] text-white bg-[#25D366] hover:bg-[#128C7E] flex-1 flex justify-center items-center gap-2'
+                                className='py-2 px-5 cursor-pointer rounded-[10px] text-white bg-green-500 hover:bg-green-600  hover:bg-[#128C7E] flex-1 flex justify-center items-center gap-2'
                             >
                                 <FaWhatsapp size={20} /> Completar pedido en WhatsApp
                             </button>

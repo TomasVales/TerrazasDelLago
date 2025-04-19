@@ -3,7 +3,7 @@ import { AiOutlineSearch } from 'react-icons/ai';
 
 const BASE_URL = 'http://localhost:3000';
 
-const SearchBar = ({ setCartItems, cartItems }) => {
+const SearchBar = ({ setCartItems, cartItems, isCartOpen, nav }) => {
     const [searchTerm, setSearchTerm] = useState('');
     const [allProducts, setAllProducts] = useState([]);
     const [results, setResults] = useState([]);
@@ -56,13 +56,13 @@ const SearchBar = ({ setCartItems, cartItems }) => {
                 onChange={(e) => setSearchTerm(e.target.value)}
             />
 
-            {results.length > 0 && (
-                <div className='absolute top-[110%] mt-2 w-full bg-white shadow-lg rounded-lg z-50 max-h-72 overflow-y-auto'>
+            {results.length > 0 && !nav && !isCartOpen && (
+                <div className='absolute top-[110%] mt-2 w-1xl bg-white shadow-lg rounded-lg z-50 max-h-72 overflow-y-auto'>
 
                     {results.map(product => (
                         <div
                             key={product.id}
-                            className='flex items-center justify-between p-3 hover:bg-gray-100 cursor-pointer'
+                            className='flex items-center justify-between p-3 hover:bg-gray-100'
                         >
                             <img
                                 src={product.image.startsWith('http') ? product.image : `${BASE_URL}${product.image}`}
@@ -74,7 +74,7 @@ const SearchBar = ({ setCartItems, cartItems }) => {
                                 <p className='text-sm text-gray-500'>${product.price.toLocaleString('es-AR')}</p>
                             </div>
                             <button
-                                className='bg-emerald-600 text-white px-2 py-1 rounded-md text-sm hover:bg-emerald-700'
+                                className='bg-emerald-700 text-white px-2 py-1 rounded-md text-sm hover:bg-emerald-800 cursor-pointer'
                                 onClick={() => addToCart({
                                     id: product.id,
                                     nombre: product.name,
