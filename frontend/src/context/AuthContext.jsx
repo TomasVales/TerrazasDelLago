@@ -56,9 +56,15 @@ export const AuthProvider = ({ children }) => {
         setUser(data);
         localStorage.setItem('auth', JSON.stringify(data));
 
-        // ⏱️ Logout automático al expirar
-        const decoded = jwtDecode(token);
+        // ✅ Extraer el token desde data
+        const decoded = jwtDecode(data.token);
         const expirationMs = decoded.exp * 1000 - Date.now();
+
+        if (!data?.token) {
+            console.warn('🚨 No se recibió token en login');
+            return;
+        }
+
         setTimeout(() => {
             logout();
         }, expirationMs);
