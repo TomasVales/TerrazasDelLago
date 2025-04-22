@@ -1,11 +1,9 @@
 const express = require('express');
 const router = express.Router();
 const { body } = require('express-validator');
-const { verifyToken, isAdmin } = require('../middlewares/authMiddleware');
+const { verifyToken, isAdmin, verifyTokenOptional } = require('../middlewares/authMiddleware');
 
-
-
-// ✅ Importás solo las funciones del controlador
+// ✅ Importás las funciones del controlador
 const {
     createOrder,
     getUserOrders,
@@ -14,10 +12,10 @@ const {
     deleteOrder,
 } = require('../controllers/orderController');
 
-// ✅ Usa verifyToken (no authMiddleware)
+// 🟢 Ruta para crear orden (logueado o invitado)
 router.post(
     '/',
-    verifyToken,
+    verifyTokenOptional,
     [
         body('items')
             .isArray({ min: 1 }).withMessage('El pedido debe tener al menos un producto'),
@@ -35,14 +33,25 @@ router.post(
         body('notes')
             .optional()
             .trim()
-            .isLength({ max: 300 }).withMessage('Las notas no pueden superar los 300 caracteres')
+            .isLength({ max: 300 }).withMessage('Las notas no pueden superar los 300 caracteres'),
+
+        body('guestName')
+            .if((value, { req }) => !req.user) // Solo validar si no hay user
+            .notEmpty().withMessage('Debe estar logueado o indicar un nombre de invitado.')
     ],
     createOrder
 );
 
+// 🔒 Ordenes del usuario autenticado
 router.get('/user', verifyToken, getUserOrders);
+
+// 🔒 Admin: obtener todas las órdenes
 router.get('/', verifyToken, isAdmin, getAllOrders);
+
+// 🔒 Admin: cambiar estado
 router.put('/:id', verifyToken, isAdmin, updateOrderStatus);
+
+// 🔒 Admin: eliminar orden
 router.delete('/:id', verifyToken, isAdmin, deleteOrder);
 
 module.exports = router;

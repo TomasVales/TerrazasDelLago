@@ -9,6 +9,9 @@ import HeaderAdmin from '../components/Admin/HeaderAdmin';
 import { useNavigate } from 'react-router-dom';
 import UserProfile from '../components/Admin/UserProfile';
 import { FaSignOutAlt } from "react-icons/fa";
+import { TbLocation } from "react-icons/tb";
+
+
 
 
 import { ShoppingCart, LayoutDashboard, Package, Users, User } from "lucide-react";
@@ -176,9 +179,11 @@ function AdminDashboard() {
                 <SidebarItem icon={<ShoppingCart size={20} />} text="Pedidos"
                     active={activeItem === 'Pedidos'}
                     onClick={() => setActiveItem('Pedidos')} />
+
                 <SidebarItem icon={<Users size={20} />} text="Usuarios"
                     active={activeItem === 'Usuarios'}
                     onClick={() => setActiveItem('Usuarios')} />
+
                 <SidebarItem icon={<User size={20} />} text="Perfil"
                     active={activeItem === 'Perfil'}
                     onClick={() => setActiveItem('Perfil')} />

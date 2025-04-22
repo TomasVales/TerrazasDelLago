@@ -12,7 +12,8 @@ const ProductForm = ({ onAddProduct, onCancel }) => {
         description: '',
         type: '',
         imageFile: null,
-        imagePreview: null
+        imagePreview: null,
+        stock: '1' // '1' = disponible, '0' = sin stock
     });
     const [isSubmitting, setIsSubmitting] = useState(false);
     const fileInputRef = useRef(null);
@@ -55,6 +56,7 @@ const ProductForm = ({ onAddProduct, onCancel }) => {
         dataToSend.append('price', formData.price);
         dataToSend.append('description', formData.description);
         dataToSend.append('type', formData.type);
+        dataToSend.append('stock', Number(formData.stock));
         if (formData.imageFile) dataToSend.append('image', formData.imageFile);
 
         try {
@@ -121,6 +123,20 @@ const ProductForm = ({ onAddProduct, onCancel }) => {
                                     required
                                 />
                             </div>
+                        </div>
+
+                        <div className="space-y-2">
+                            <label className="block text-sm font-medium text-gray-700">Stock</label>
+                            <select
+                                name="stock"
+                                value={formData.stock}
+                                onChange={handleChange}
+                                className="w-full px-4 py-2.5 border border-gray-200 rounded-lg focus:ring-2 focus:ring-[#208850] focus:border-transparent transition-all"
+                                required
+                            >
+                                <option value="1">Disponible</option>
+                                <option value="0">Sin stock</option>
+                            </select>
                         </div>
 
                         <div className="space-y-2">

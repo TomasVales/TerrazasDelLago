@@ -116,7 +116,7 @@ const OrderAdmin = ({ searchQuery }) => {
                                 {filteredOrders.map((order) => (
                                     <tr key={order.id} className="border-b border-gray-200 hover:bg-gray-50">
                                         <td className="p-4">{order.id}</td>
-                                        <td className="p-4">{order.User?.name || 'Anónimo'}</td>
+                                        <td className="p-4">{order.User?.name || order.guestName || 'Anónimo'}</td>
                                         <td className="p-4 text-blue-600 font-semibold">${order.total}</td>
                                         <td className={`p-4 capitalize ${order.status === 'completed'
                                             ? 'text-green-500'

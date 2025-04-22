@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { AiOutlineSearch } from 'react-icons/ai';
+import { Slide, toast } from 'react-toastify';
 
 const BASE_URL = 'http://localhost:3000';
 
@@ -7,6 +8,13 @@ const SearchBar = ({ setCartItems, cartItems, isCartOpen, nav }) => {
     const [searchTerm, setSearchTerm] = useState('');
     const [allProducts, setAllProducts] = useState([]);
     const [results, setResults] = useState([]);
+
+    const notify = () => {
+        toast.success("Pedido Realizado", {
+            transition: Slide,
+        });
+    };
+
 
     useEffect(() => {
         const fetchProducts = async () => {
@@ -57,12 +65,15 @@ const SearchBar = ({ setCartItems, cartItems, isCartOpen, nav }) => {
             />
 
             {results.length > 0 && !nav && !isCartOpen && (
-                <div className='absolute top-[110%] mt-2 w-1xl bg-white shadow-lg rounded-lg z-50 max-h-72 overflow-y-auto'>
-
+                <div className='
+        absolute top-[110%] mt-2 w-1xl bg-white shadow-xl rounded-xl z-50 
+        max-h-72 overflow-y-auto 
+        animate-fadeInDown transition-all duration-300
+    '>
                     {results.map(product => (
                         <div
                             key={product.id}
-                            className='flex items-center justify-between p-3 hover:bg-gray-100'
+                            className='flex items-center justify-between p-3 hover:bg-gray-100 transition-all duration-200'
                         >
                             <img
                                 src={product.image.startsWith('http') ? product.image : `${BASE_URL}${product.image}`}
@@ -75,12 +86,15 @@ const SearchBar = ({ setCartItems, cartItems, isCartOpen, nav }) => {
                             </div>
                             <button
                                 className='bg-emerald-700 text-white px-2 py-1 rounded-md text-sm hover:bg-emerald-800 cursor-pointer'
-                                onClick={() => addToCart({
-                                    id: product.id,
-                                    nombre: product.name,
-                                    precio: product.price,
-                                    imagen: product.image.startsWith('http') ? product.image : `${BASE_URL}${product.image}`
-                                })}
+                                onClick={() => {
+                                    addToCart({
+                                        id: product.id,
+                                        nombre: product.name,
+                                        precio: product.price,
+                                        imagen: product.image.startsWith('http') ? product.image : `${BASE_URL}${product.image}`
+                                    });
+                                    notify();
+                                }}
                             >
                                 Añadir
                             </button>
@@ -88,6 +102,7 @@ const SearchBar = ({ setCartItems, cartItems, isCartOpen, nav }) => {
                     ))}
                 </div>
             )}
+
         </div>
     );
 };

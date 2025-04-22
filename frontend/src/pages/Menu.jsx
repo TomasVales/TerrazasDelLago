@@ -3,9 +3,16 @@ import { AiOutlineClose, AiOutlineMenu, AiOutlineSearch, AiOutlineShoppingCart }
 import { BsFillCartFill } from 'react-icons/bs';
 import { TbLocation, TbTruckDelivery } from 'react-icons/tb';
 import { FaSignOutAlt, FaWhatsapp } from "react-icons/fa";
+import { FaSignInAlt } from "react-icons/fa";
 import { GoTrash } from "react-icons/go";
 import { useAuth } from '../context/AuthContext';
 import SearchBar from '../components/menu/SearchBar';
+import { useNavigate } from 'react-router-dom';
+import { FaRegClock } from 'react-icons/fa';
+import { Clock3 } from 'lucide-react';
+
+
+
 
 
 
@@ -18,6 +25,9 @@ const Menu = ({ cartItems, setCartItems, setMostrarTransferencia, logout }) => {
     const [deliveryMethod, setDeliveryMethod] = useState('');
     const [address, setAddress] = useState('');
     const deliveryMethodFinal = deliveryMethod === 'envio' ? 'domicilio' : 'local';
+    const [showLocation, setShowLocation] = useState(false);
+    const [guestName, setGuestName] = useState('');
+    const [showHorarios, setShowHorarios] = useState(false);
 
 
     const increase = (id) => {
@@ -45,13 +55,6 @@ const Menu = ({ cartItems, setCartItems, setMostrarTransferencia, logout }) => {
     const total = cartItems.reduce((acc, item) => acc + item.precio * item.cantidad, 0);
 
     const handleConfirmarOrden = async () => {
-        const token = user?.token;
-
-        if (!token) {
-            alert("No estás logueado. Por favor, iniciá sesión.");
-            return;
-        }
-
         if (!paymentMethod || !deliveryMethod) {
             alert("Por favor seleccioná una forma de pago y un método de entrega.");
             return;
@@ -62,68 +65,75 @@ const Menu = ({ cartItems, setCartItems, setMostrarTransferencia, logout }) => {
             return;
         }
 
+        if (!isAuthenticated && !guestName.trim()) {
+            alert("Por favor ingresá tu nombre.");
+            return;
+        }
+
         const direccionFinal = deliveryMethod === 'envio' ? address : 'Retiro en el local';
 
-        // 👇 PONÉ ESTO PARA VERIFICAR LOS DATOS QUE SE MANDAN
-        console.log("➡ Enviando pedido con:", {
-            token,
+        const payload = {
             items: cartItems.map(item => ({
                 productId: item.id,
                 quantity: item.cantidad
             })),
             address: direccionFinal,
-            paymentMethod,
-            deliveryMethod
-        });
+            notes: `Pedido generado desde frontend (${paymentMethod} - ${deliveryMethod})`,
+            guestName: isAuthenticated ? null : guestName
+        };
 
         try {
             const response = await fetch("http://localhost:3000/api/orders", {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",
-                    Authorization: `Bearer ${token}`
+                    ...(isAuthenticated && { Authorization: `Bearer ${user.token}` })
                 },
-                body: JSON.stringify({
-                    items: cartItems.map(item => ({
-                        productId: item.id,
-                        quantity: item.cantidad
-                    })),
-                    address: direccionFinal,
-                    notes: `Pedido generado desde frontend (${paymentMethod} - ${deliveryMethod})`
-                })
-
+                body: JSON.stringify(payload)
             });
 
             const data = await response.json();
             if (!response.ok) throw new Error(data.message || "Error al guardar el pedido");
 
-            // ✅ Armar el mensaje de WhatsApp con ID real del pedido
-            const mensaje = `
-    PEDIDO: *TER-${data.id || Math.random().toString(36).substring(2, 7).toUpperCase()}* 
-    Estado del pago: Pendiente
+            const mensaje = `PEDIDO: *TER-${data.id || Math.random().toString(36).substring(2, 7).toUpperCase()}* 
     ${cartItems.map(item => `— ${item.nombre} (x${item.cantidad}) > *$${(item.precio * item.cantidad).toLocaleString('es-AR')}*`).join('\n')}
     *Total: $${total.toLocaleString('es-AR')}*
-    Forma de pago: *${paymentMethod.charAt(0).toUpperCase() + paymentMethod.slice(1)}*
-    Método de entrega: *${deliveryMethod === 'retiro' ? 'Retiro en el comercio' : 'Envío a domicilio'}*
-    Dirección de envío: *${direccionFinal}*
-    Aclaraciones del pedido: *Pedido generado desde la web*
-            `;
+    Cliente: *${isAuthenticated ? user.name : guestName}*
+    Forma de pago: *${paymentMethod}*
+    Método de entrega: *${deliveryMethod}*
+    Dirección: *${direccionFinal}*
+    Aclaraciones: *Pedido generado desde la web*`;
 
-            const urlWhatsapp = `https://wa.me/5491151393916?text=${encodeURIComponent(mensaje)}`;
-            window.open(urlWhatsapp, "_blank");
+            window.open(`https://wa.me/5491151393916?text=${encodeURIComponent(mensaje)}`, "_blank");
 
-            // 🧹 Limpieza final
+            // limpieza
             setCartItems([]);
             setAddress('');
             setPaymentMethod('');
             setDeliveryMethod('');
             setIsCartOpen(false);
+            setGuestName('');
 
         } catch (error) {
             console.error("Error al confirmar orden:", error);
             alert("No se pudo completar la orden.");
         }
     };
+
+
+
+    const navigate = useNavigate(); // ✅ NUEVO
+    const isAuthenticated = !!user; // ✅ NUEVO
+
+    const handleAuthClick = () => {
+        if (isAuthenticated) {
+            logout();
+        } else {
+            navigate('/login');
+        }
+        setNav(false); // cerrar menú si estaba abierto
+    };
+
     return (
         <div className='max-w-screen flex justify-between items-center p-4 font-montserrat'>
             {/* Lado izquierdo */}
@@ -157,9 +167,9 @@ const Menu = ({ cartItems, setCartItems, setMostrarTransferencia, logout }) => {
                     ></div>
 
                     <div className='
-                        md:w-[630px] w-[95vw]
-                        fixed p-4 rounded-lg top-4 bottom-4 left-1/2 -translate-x-1/2 
-                        bg-white z-10 duration-300 overflow-y-auto custom-scroll'>
+    md:w-[630px] w-[95vw]
+    fixed p-4 rounded-lg top-4 bottom-4 left-1/2 -translate-x-1/2 
+    bg-white z-10 duration-300 overflow-y-auto custom-scroll animate-fadeIn'>
                         <div className='flex justify-between items-center p-4 border-b border-gray-600'>
                             <h2 className='text-2xl text-emerald-700 font-bold'>Carrito</h2>
                             <button
@@ -290,6 +300,21 @@ const Menu = ({ cartItems, setCartItems, setMostrarTransferencia, logout }) => {
                             )}
                         </div>
 
+                        {!isAuthenticated && (
+                            <div className="my-4 bg-white p-4 rounded-xl border">
+                                <label className="block text-sm font-medium text-gray-700 mb-1">
+                                    Tu nombre (requerido para completar el pedido)
+                                </label>
+                                <input
+                                    type="text"
+                                    placeholder="Ej: Juan Pérez"
+                                    value={guestName}
+                                    onChange={(e) => setGuestName(e.target.value)}
+                                    className="w-full p-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-[#208850]"
+                                />
+                            </div>
+                        )}
+
                         {/* Botones */}
                         <div className='flex flex-col sm:flex-row gap-4'>
                             <button
@@ -328,8 +353,24 @@ const Menu = ({ cartItems, setCartItems, setMostrarTransferencia, logout }) => {
                             <AiOutlineShoppingCart size={23} className='mr-4' />
                             Carrito
                         </li>
-                        <li className='text-xl py-4 flex gap-1'><TbTruckDelivery size={25} className='mr-4' />Ordenes</li>
-                        <li className='text-xl py-4 flex gap-1'><TbLocation size={25} className='mr-4' />Direcciones</li>
+                        <li
+                            className='text-xl py-4 flex gap-1 cursor-pointer hover:text-emerald-600 transition-all'
+                            onClick={() => {
+                                setShowHorarios(true);
+                                setNav(false); // cerrar el menú lateral
+                            }}
+                        >
+                            <FaRegClock size={25} className='mr-4' /> Horarios
+                        </li>
+                        <li
+                            className='text-xl py-4 flex gap-1 cursor-pointer hover:text-emerald-600 transition-all'
+                            onClick={() => {
+                                setShowLocation(true);
+                                setNav(false); // cerrás el menú lateral si querés
+                            }}
+                        >
+                            <TbLocation size={25} className='mr-4' /> Ubicacion
+                        </li>
                         <li className='text-xl py-4 flex gap-1 cursor-pointer hover:text-emerald-600 transition-all'>
                             <a
                                 href="https://wa.me/5491151393916"
@@ -345,19 +386,74 @@ const Menu = ({ cartItems, setCartItems, setMostrarTransferencia, logout }) => {
 
                 <div className='absolute bottom-4 left-0 right-0 px-4'>
                     <button
-                        onClick={() => {
-                            logout();
-                            setNav(false);
-                        }}
-                        className='w-full py-3 bg-red-600 hover:bg-red-700 text-white rounded-md flex items-center justify-center gap-2 transition-all cursor-pointer'
+                        onClick={handleAuthClick}
+                        className={`w-full py-3 ${isAuthenticated ? 'bg-red-600 hover:bg-red-700' : 'bg-emerald-600 hover:bg-emerald-700'
+                            } text-white rounded-md flex items-center justify-center gap-2 transition-all cursor-pointer`}
                     >
-                        <FaSignOutAlt size={20} />
-                        Cerrar Sesión
+                        {isAuthenticated ? <FaSignOutAlt size={20} /> : <FaSignInAlt size={20} />}
+                        {isAuthenticated ? 'Cerrar Sesión' : 'Iniciar Sesión'}
                     </button>
                 </div>
             </div>
+            {showLocation && (
+                <div className="fixed inset-0 z-50 bg-black/60 flex justify-center items-center">
+                    <div className="bg-white rounded-xl p-6 max-w-xl w-full relative animate-fadeIn">
+
+                        <h2 className="text-xl font-semibold mb-4">📍 Acá nos ubicamos</h2>
+                        <iframe
+                            src="https://www.google.com/maps?q=-34.695572,-58.2870493&z=18&output=embed"
+                            width="100%"
+                            height="300"
+                            allowFullScreen=""
+                            loading="lazy"
+                            className="rounded border"
+                        />
+
+                        <button
+                            onClick={() => setShowLocation(false)}
+                            className="absolute top-3 right-3 text-gray-500 hover:text-black text-xl"
+                        >✕</button>
+                    </div>
+                </div>
+            )}
+            {showHorarios && (
+                <div className="fixed inset-0 z-50 bg-black/50 flex justify-center items-center px-4">
+                    <div className="bg-white rounded-2xl shadow-2xl w-full max-w-3xl p-6 animate-fadeIn relative">
+                        <h2 className="text-3xl font-bold text-emerald-700 mb-6 text-center flex items-center justify-center gap-2">
+                            🕗 Horarios de Atención
+                        </h2>
+
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 text-gray-800 text-[16px] sm:text-[18px]">
+
+                            {/* Salón */}
+                            <div className="bg-gray-100 p-5 rounded-xl shadow-inner">
+                                <p className="font-semibold text-emerald-600 text-lg mb-1">🪑 Salón</p>
+                                <p>Martes a Domingo: <span className="font-medium">08:00 a 00:00 hs</span></p>
+                                <p className="text-red-600 mt-2 font-semibold">Lunes: CERRADO</p>
+                            </div>
+
+                            {/* Delivery */}
+                            <div className="bg-gray-100 p-5 rounded-xl shadow-inner">
+                                <p className="font-semibold text-emerald-600 text-lg mb-1">🚚 Delivery</p>
+                                <p>Martes a Domingo:</p>
+                                <p className="pl-2">🕛 12:00 a 15:00 hs</p>
+                                <p className="pl-2">🌙 20:00 a 23:00 hs</p>
+                                <p className="text-red-600 mt-2 font-semibold">Lunes: CERRADO</p>
+                            </div>
+                        </div>
+
+                        <button
+                            onClick={() => setShowHorarios(false)}
+                            className="absolute top-4 right-4 text-gray-500 hover:text-black text-2xl transition"
+                        >
+                            ✕
+                        </button>
+                    </div>
+                </div>
+            )}
+
         </div>
     );
 };
 
-export default Menu;
+export default Menu;    

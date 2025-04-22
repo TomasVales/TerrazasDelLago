@@ -11,6 +11,7 @@ import Comida from './components/Menu/Comida';
 import FooterMenu from './components/Menu/FooterMenu';
 import { ToastContainer } from 'react-toastify';
 
+
 import { useEffect, useState } from 'react';
 
 function App() {
@@ -41,32 +42,37 @@ function App() {
 
   return (
     <Routes>
+      {/*Esto redirige a menu*/}
       <Route
         path="/"
+        element={<Navigate to="/menu" />}
+      />
+      <Route
+        path="login"
+        element={!user ? <Auth /> : <Navigate to={user.role === 'admin' ? "/admin" : "/menu"} />}
+      />
+
+
+      <Route
+        path="/menu"
         element={
-          user ? (
-            mostrarTransferencia ? (
-              <Transferencia onVolver={() => setMostrarTransferencia(false)} />
-            ) : (
-              <div>
-                <Menu cartItems={cartItems} setCartItems={setCartItems} setMostrarTransferencia={setMostrarTransferencia} logout={logout} />
-                <Cartel />
-                <Cards />
-                <ToastContainer limit={3} autoClose={2000} />
-                <Comida addToCart={addToCart} />
-                <FooterMenu />
-              </div>
-            )
-          ) : (
-            <Navigate to="/login" />
-          )
+          <div>
+            <Menu
+              cartItems={cartItems}
+              setCartItems={setCartItems}
+              setMostrarTransferencia={setMostrarTransferencia}
+              logout={logout}
+            />
+            <Cartel />
+            <Cards setCartItems={setCartItems} cartItems={cartItems} />
+            <ToastContainer limit={3} autoClose={2000} />
+            <Comida addToCart={addToCart} />
+            <FooterMenu />
+          </div>
         }
       />
 
-      <Route
-        path="/login"
-        element={!user ? <Auth /> : <Navigate to={user.role === 'admin' ? "/admin" : "/"} />}
-      />
+
 
       <Route
         path="/admin"

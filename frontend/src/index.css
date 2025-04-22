@@ -19,9 +19,42 @@ body,
     --breakpoint-sy: 400px;
     --breakpoint-lp: 500px;
     --breakpoint-gr: 561px;
+    --breakpoint-62p: 620px;
 }
 
 /* Scrollbar visible solo en navegadores basados en Webkit */
 .custom-scroll::-webkit-scrollbar {
     width: 0px;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.animate-fadeIn {
+    animation: fadeIn 0.3s ease-out;
+}
+
+@keyframes fadeInDown {
+    0% {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+
+    100% {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.animate-fadeInDown {
+    animation: fadeInDown 0.3s ease-out both;
 }

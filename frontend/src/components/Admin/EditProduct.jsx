@@ -12,7 +12,8 @@ const EditProduct = ({ product, onUpdate, onCancel }) => {
         description: '',
         type: '',
         imageFile: null,
-        imagePreview: null
+        imagePreview: null,
+        stock: '1',
     });
     const [isSubmitting, setIsSubmitting] = useState(false);
     const fileInputRef = useRef(null);
@@ -24,6 +25,7 @@ const EditProduct = ({ product, onUpdate, onCancel }) => {
                 price: product.price,
                 description: product.description,
                 type: product.type,
+                stock: product.stock?.toString() ?? '1',
                 imageFile: null,
                 imagePreview: product.image ? `http://localhost:3000${product.image}?ts=${Date.now()}` : null
             });
@@ -58,6 +60,7 @@ const EditProduct = ({ product, onUpdate, onCancel }) => {
         dataToSend.append('price', formData.price);
         dataToSend.append('description', formData.description);
         dataToSend.append('type', formData.type);
+        dataToSend.append('stock', formData.stock); // ✅ Ahora sí se envía al backend
         if (formData.imageFile) dataToSend.append('image', formData.imageFile);
 
         try {
@@ -117,6 +120,8 @@ const EditProduct = ({ product, onUpdate, onCancel }) => {
                                     className="w-full pl-8 pr-4 py-2.5 border border-gray-200 rounded-lg"
                                 />
                             </div>
+
+
                         </div>
                         <div className="space-y-2">
                             <label className="text-sm font-medium text-gray-700">Categoría</label>
@@ -134,6 +139,19 @@ const EditProduct = ({ product, onUpdate, onCancel }) => {
                                     ))}
                                 </select>
                                 <ChevronDown className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 pointer-events-none" size={18} />
+                            </div>
+                            <div className="space-y-2">
+                                <label className="text-sm font-medium text-gray-700">Stock</label>
+                                <select
+                                    name="stock"
+                                    value={formData.stock}
+                                    onChange={handleChange}
+                                    required
+                                    className="w-full px-4 py-2.5 border border-gray-200 rounded-lg"
+                                >
+                                    <option value="1">Disponible</option>
+                                    <option value="0">Sin stock</option>
+                                </select>
                             </div>
                         </div>
                         <div className="space-y-2">

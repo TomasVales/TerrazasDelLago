@@ -18,6 +18,10 @@ const Order = sequelize.define('Order', {
         type: DataTypes.TEXT,
         allowNull: true
     },
+    guestName: {
+        type: DataTypes.STRING,
+        allowNull: true
+    }
 });
 
 module.exports = Order;

@@ -23,9 +23,17 @@ const Product = sequelize.define('Product', {
         type: DataTypes.FLOAT,
         allowNull: false,
     },
+    stock: {
+        type: DataTypes.INTEGER,
+        defaultValue: 0,
+    },
+    isFeatured: {
+        type: DataTypes.BOOLEAN,
+        defaultValue: false,
+    }
 }, {
-    tableName: 'Products', // Asegura el uso del nombre correcto con mayúscula
-    timestamps: true, // Para manejar createdAt y updatedAt automáticamente
+    tableName: 'Products',
+    timestamps: true,
 });
 
 module.exports = Product;

@@ -107,6 +107,30 @@ const ProdAdmin = ({ searchQuery }) => {
         });
     };
 
+    const handleToggleFeatured = async (id, newValue) => {
+        try {
+            const res = await fetch(`${BACKEND_URL}/api/products/${id}/featured`, {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json',
+                    Authorization: `Bearer ${user?.token}`,
+                },
+                body: JSON.stringify({ isFeatured: newValue }),
+            });
+
+            const data = await res.json();
+            if (!res.ok) throw new Error(data.message);
+
+            // Actualizá localmente el producto
+            setProducts(prev =>
+                prev.map((p) => p.id === id ? { ...p, isFeatured: newValue } : p)
+            );
+        } catch (error) {
+            console.error('Error al actualizar destacado:', error);
+            MySwal.fire('Error', error.message || 'No se pudo actualizar destacado.', 'error');
+        }
+    };
+
     const getMainCategory = (type) => {
         if (['Burguers', 'Carnes', 'Pastas', 'Minutas'].includes(type)) return 'Comidas';
         if (['Vinos', 'Bebidas'].includes(type)) return 'Bebidas';
@@ -201,7 +225,8 @@ const ProdAdmin = ({ searchQuery }) => {
                                             h-15 px-4 text-left align-middle font-medium text-gray-500 '>Precio</th>
                                             <th className='
                                             
-                                            h-15 px-4 text-left align-middle font-medium text-gray-500 '>Ventas Totales</th>
+                                            
+                                            h-15 px-4 text-center align-middle font-medium text-gray-500'>Destacado</th>
                                             <th className='
                                             
                                             h-15 px-4 text-left align-middle font-medium text-gray-500 '>Creación</th>
@@ -229,7 +254,16 @@ const ProdAdmin = ({ searchQuery }) => {
                                                     </div>
                                                 </td>
                                                 <td className='p-4 align-middle'>${parseFloat(product.price).toFixed(2)}</td>
-                                                <td className='p-4 align-middle'>-</td>
+                                                <td className='p-4 align-middle text-center'>
+                                                    <input
+                                                        type="checkbox"
+                                                        checked={product.isFeatured}
+                                                        onChange={() => handleToggleFeatured(product.id, !product.isFeatured)}
+                                                        className="w-4 h-4 cursor-pointer"
+                                                    />
+                                                </td>
+
+
                                                 <td className='p-4 align-middle'>
                                                     {new Date(product.createdAt).toLocaleDateString('es-AR')}
                                                 </td>

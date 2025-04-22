@@ -5,7 +5,6 @@ import Image from '../../src/assets/nuevoquilmes.webp';
 import Logo from '../../src/assets/logo3.webp';
 import { useNavigate } from 'react-router-dom';
 
-
 function Login({ onSwitch }) {
     const { login } = useAuth();
     const [email, setEmail] = useState('');
@@ -61,8 +60,6 @@ function Login({ onSwitch }) {
                 email: data.user.email,
             });
 
-
-
             setCaptchaToken(null);
             setCaptchaVisible(false);
 
@@ -72,6 +69,7 @@ function Login({ onSwitch }) {
                 localStorage.removeItem('rememberedEmail');
             }
 
+            navigate('/'); // ✅ REDIRECCIÓN AL MENÚ
 
         } catch (err) {
             console.error(err);
@@ -96,6 +94,9 @@ function Login({ onSwitch }) {
                 role: data.user.role,
                 email: data.user.email,
             });
+
+            navigate('/'); // ✅ REDIRECCIÓN DESPUÉS DEL LOGIN CON GOOGLE
+
         } catch (err) {
             console.error(err);
             setMessage('Error con Google: ' + err.message);

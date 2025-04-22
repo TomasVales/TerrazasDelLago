@@ -8,7 +8,7 @@ function FooterMenu() {
                 <p className="text-sm text-center text-gray-700 sm:text-center font-semibold">
                     Copyright &copy; Terrazas del Lago -{' '}
                     <a
-                        href="https://kiad.com.ar"
+                        href="https://kiad.dev"
                         target="_blank"
                         rel="noopener noreferrer"
                         className="hover:underline text-emerald-800 hover:text-emerald-600 transition-colors"

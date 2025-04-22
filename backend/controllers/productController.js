@@ -21,7 +21,7 @@ const createProduct = async (req, res) => {
         return res.status(400).json({ errors: errors.array() });
     }
     try {
-        const { name, type, price, description } = req.body;
+        const { name, type, price, description, stock } = req.body;
 
 
         let imagePath = '';
@@ -74,7 +74,7 @@ const updateProduct = async (req, res) => {
         return res.status(400).json({ errors: errors.array() });
     }
     try {
-        const { name, type, price, existingImage } = req.body;
+        const { name, type, price, description, stock, existingImage } = req.body;
 
         const product = await Product.findByPk(req.params.id);
         if (!product) return res.status(404).json({ message: 'Producto no encontrado' });
@@ -91,12 +91,18 @@ const updateProduct = async (req, res) => {
             imagePath = '/uploads/' + req.file.filename;
         }
 
-        await product.update({ name, image: imagePath, type, price });
+        await product.update({
+            name,
+            price,
+            description,
+            type,
+            stock: parseInt(stock), // ✅ conversión segura
+            image: imagePath,
+        });
 
-        // ¡Asegúrate de devolver la ruta de la imagen actualizada o existente!
         res.json({
             ...product.get({ plain: true }),
-            image: imagePath // Esto es crítico
+            image: imagePath
         });
 
     } catch (err) {
